@@ -1,11 +1,11 @@
 {
-  "name": "project-1",
+  "name": "pdf-maker",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "build": "npx tailwindcss -i ./src/tailwind.css -o ./public/style.css",
-    "build-p": "postcss ./src/tailwind.css -o ./public/style.css --watch",
+    "build-p": "postcss ./src/tailwind.css -o ./public/style.css",
     "dev": "next dev",
     "start": "next start"
   },
