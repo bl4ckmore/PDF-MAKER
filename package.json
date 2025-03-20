@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npx tailwindcss -i ./src/tailwind.css -o ./public/style.css --watch",
+    "build": "npx tailwindcss -i ./src/tailwind.css -o ./public/style.css",
     "build-p": "postcss ./src/tailwind.css -o ./public/style.css --watch",
     "dev": "next dev",
     "start": "next start"
@@ -23,6 +23,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "string-width-cjs": "^5.1.1",
-    "strip-ansi-cjs": "^8.0.0"
+    "strip-ansi-cjs": "^8.0.0",
+    "wrap-ansi-cjs": "^8.0.0"
   }
 }
