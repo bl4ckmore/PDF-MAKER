@@ -88,14 +88,14 @@ export default function Home() {
       </button>
 
       {updatedFile && (
-        <a
-          href={`${API_BASE_URL}/pdf/${updatedFile}`}
-          className="mt-6 px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg text-white font-semibold text-lg transition-all duration-200 shadow-lg"
-          download
-        >
-          Download Updated PDF
-        </a>
-      )}
+  <a
+    href={`https://https://pdfapi-si07.onrender.com/pdf/${updatedFile}`}
+    download
+    className="mt-6 px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg text-white font-semibold text-lg transition-all duration-200 shadow-lg"
+  >
+    Download Updated PDF
+  </a>
+)}
     </div>
   );
 }
