@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-const API_BASE_URL = "https://pdfapi-si07.onrender.com";
+const API_BASE_URL = "https://pdfapi-si07.onrender.com"; // 🌐 Replace with your actual backend if different
 
 export default function Home() {
   const [file, setFile] = useState(null);
@@ -14,7 +14,6 @@ export default function Home() {
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     setFile(selectedFile);
-
     if (selectedFile) {
       const objectUrl = URL.createObjectURL(selectedFile);
       setPreviewUrl(objectUrl);
@@ -23,7 +22,7 @@ export default function Home() {
 
   const handleUpload = async () => {
     if (!file || !searchText || !replaceText) {
-      alert("Please upload a file and enter text to replace.");
+      alert("Please upload a file and enter both search and replacement text.");
       return;
     }
 
@@ -36,32 +35,39 @@ export default function Home() {
     try {
       const response = await axios.post(
         `${API_BASE_URL}/api/pdf/replace-text`,
-        formData
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
+
       setUpdatedFile(response.data.filename);
     } catch (error) {
-      alert("Error replacing text. Please try again.");
+      console.error("Upload error:", error);
+      alert("❌ Error replacing text. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-5">
-      <h1 className="text-3xl font-bold mb-5">📄 PDF Text Editor</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-6">
+      <h1 className="text-3xl font-bold mb-6">📄 PDF Text Editor</h1>
 
       <input
         type="file"
         accept="application/pdf"
         onChange={handleFileChange}
-        className="mb-4 p-3 bg-gray-800 border border-gray-600 rounded-lg cursor-pointer hover:bg-gray-700 transition-all duration-200"
+        className="mb-4 p-2 w-full max-w-lg bg-gray-800 border border-gray-600 rounded-md"
       />
 
       {previewUrl && (
         <iframe
           src={previewUrl}
-          className="w-full max-w-lg h-80 border-2 border-gray-500 rounded-lg mt-4 shadow-lg"
-        />
+          className="w-full max-w-lg h-72 border border-gray-700 rounded mb-4"
+        ></iframe>
       )}
 
       <input
@@ -69,33 +75,34 @@ export default function Home() {
         placeholder="Text to find"
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
-        className="mt-4 p-3 w-full max-w-lg bg-gray-800 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
+        className="mb-3 p-2 w-full max-w-lg bg-gray-800 border border-gray-600 rounded text-white"
       />
+
       <input
         type="text"
         placeholder="Replace with"
         value={replaceText}
         onChange={(e) => setReplaceText(e.target.value)}
-        className="mt-4 p-3 w-full max-w-lg bg-gray-800 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
+        className="mb-4 p-2 w-full max-w-lg bg-gray-800 border border-gray-600 rounded text-white"
       />
 
       <button
         onClick={handleUpload}
-        className="mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold text-lg transition-all duration-200 shadow-lg disabled:bg-gray-600 disabled:cursor-not-allowed"
+        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-semibold disabled:bg-gray-600"
         disabled={loading}
       >
         {loading ? "Processing..." : "Upload & Replace Text"}
       </button>
 
       {updatedFile && (
-  <a
-    href={`https://https://pdfapi-si07.onrender.com/pdf/${updatedFile}`}
-    download
-    className="mt-6 px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg text-white font-semibold text-lg transition-all duration-200 shadow-lg"
-  >
-    Download Updated PDF
-  </a>
-)}
+        <a
+          href={`${API_BASE_URL}/pdf/${updatedFile}`}
+          download
+          className="mt-6 inline-block px-6 py-2 bg-green-600 hover:bg-green-700 rounded text-white font-semibold"
+        >
+          Download Updated PDF
+        </a>
+      )}
     </div>
   );
 }
