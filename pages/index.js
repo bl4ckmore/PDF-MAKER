@@ -29,10 +29,11 @@ export default function Home() {
 
     setLoading(true);
     const formData = new FormData();
-    formData.append("pdf", file);
+    formData.append("pdf", file); // 🔴 Name must match multer.single("pdf")
     formData.append("searchText", searchText);
     formData.append("replaceText", replaceText);
 
+    1;
     try {
       const response = await axios.post(
         `${API_BASE_URL}/api/pdf/replace-text`,
