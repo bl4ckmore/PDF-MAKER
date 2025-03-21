@@ -29,7 +29,7 @@ export default function Home() {
 
     setLoading(true);
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("pdf", file); // ✅ Must be "pdf" to match backend's req.files.pdf
     formData.append("searchText", searchText);
     formData.append("replaceText", replaceText);
 
