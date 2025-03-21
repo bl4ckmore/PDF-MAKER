@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-const API_BASE_URL = "https://pdfapi-2xdf.onrender.com";
+const API_BASE_URL = "https://pdfapi-si07.onrender.com";
 
 export default function Home() {
   const [file, setFile] = useState(null);
