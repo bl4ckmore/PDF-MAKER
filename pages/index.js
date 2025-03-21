@@ -1,7 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
 
-const API_BASE_URL = "https://pdfapi-si07.onrender.com"; // 🌐 Replace with your actual backend if different
+// ✅ Live backend URL
+const API_BASE_URL = "https://pdfapi-si07.onrender.com";
 
 export default function Home() {
   const [file, setFile] = useState(null);
@@ -13,15 +14,15 @@ export default function Home() {
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
+    if (!selectedFile) return;
+
     setFile(selectedFile);
-    if (selectedFile) {
-      const objectUrl = URL.createObjectURL(selectedFile);
-      setPreviewUrl(objectUrl);
-    }
+    const objectUrl = URL.createObjectURL(selectedFile);
+    setPreviewUrl(objectUrl);
   };
 
   const handleUpload = async () => {
-    if (!file || !searchText || !replaceText) {
+    if (!file || !searchText.trim() || !replaceText.trim()) {
       alert("Please upload a file and enter both search and replacement text.");
       return;
     }
@@ -36,16 +37,12 @@ export default function Home() {
       const response = await axios.post(
         `${API_BASE_URL}/api/pdf/replace-text`,
         formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
 
       setUpdatedFile(response.data.filename);
     } catch (error) {
-      console.error("Upload error:", error);
+      console.error("❌ Upload error:", error);
       alert("❌ Error replacing text. Please try again.");
     } finally {
       setLoading(false);
@@ -88,8 +85,8 @@ export default function Home() {
 
       <button
         onClick={handleUpload}
-        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-semibold disabled:bg-gray-600"
         disabled={loading}
+        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-semibold disabled:bg-gray-600"
       >
         {loading ? "Processing..." : "Upload & Replace Text"}
       </button>
