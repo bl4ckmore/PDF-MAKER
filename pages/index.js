@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import axios from "axios";
 
 const API_BASE_URL = "https://pdfapi-si07.onrender.com";
@@ -10,11 +10,21 @@ export default function Home() {
   const [replaceText, setReplaceText] = useState("");
   const [loading, setLoading] = useState(false);
   const [updatedFile, setUpdatedFile] = useState(null);
+  const fileInputRef = useRef(null);
 
   const handleShowEditor = () => setShowEditor(true);
-  const handleBack = () => setShowEditor(false);
+  const handleBack = () => {
+    setShowEditor(false);
+    setUpdatedFile(null);
+    setFile(null);
+    setSearchText("");
+    setReplaceText("");
+  };
 
-  const handleFileChange = (e) => setFile(e.target.files[0]);
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+    setUpdatedFile(null); // clear any previous result
+  };
 
   const handleUpload = async () => {
     if (!file || !searchText.trim() || !replaceText.trim()) {
@@ -42,7 +52,9 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-6">
       <nav className="w-full flex items-center justify-between p-4 bg-gray-800 fixed top-0 left-0">
-        <button onClick={() => window.location.reload()} className="text-lg font-bold">PDF Editor</button>
+        <button onClick={() => window.location.reload()} className="text-lg font-bold">
+          PDF Editor
+        </button>
         <div className="hidden md:flex gap-4">
           <a href="#" className="hover:underline">Home</a>
           <a href="#" className="hover:underline">Upload</a>
@@ -65,22 +77,32 @@ export default function Home() {
             </button>
           </div>
         ) : (
-          <div className="w-full max-w-xl space-y-4">
+          <div className="w-full max-w-xl space-y-4 bg-gray-800 p-6 rounded-lg shadow-lg">
             <h2 className="text-xl font-bold">📄 PDF Text Editor</h2>
 
-            <input
-              type="file"
-              accept="application/pdf"
-              onChange={handleFileChange}
-              className="w-full p-2 bg-gray-800 rounded"
-            />
+            {/* Styled "Select File" Button */}
+            <div className="flex flex-col items-center gap-3">
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={handleFileChange}
+                ref={fileInputRef}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current.click()}
+                className="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white font-semibold"
+              >
+                {file ? `📁 ${file.name}` : "Select File"}
+              </button>
+            </div>
 
             <input
               type="text"
               placeholder="Text to find"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className="w-full p-2 bg-gray-800 rounded"
+              className="w-full p-2 bg-gray-700 rounded"
             />
 
             <input
@@ -88,7 +110,7 @@ export default function Home() {
               placeholder="Replace with"
               value={replaceText}
               onChange={(e) => setReplaceText(e.target.value)}
-              className="w-full p-2 bg-gray-800 rounded"
+              className="w-full p-2 bg-gray-700 rounded"
             />
 
             <button
@@ -105,13 +127,13 @@ export default function Home() {
                 download
                 className="block mt-4 text-center bg-blue-700 hover:bg-blue-800 px-6 py-2 rounded"
               >
-                Download Updated PDF
+                ⬇️ Download Updated PDF
               </a>
             )}
 
             <button
               onClick={handleBack}
-              className="block mt-2 text-sm text-gray-400 hover:underline"
+              className="block mt-4 text-sm text-gray-400 hover:underline text-center"
             >
               ← Back
             </button>
