@@ -76,6 +76,15 @@ export default function Register() {
         >
           {loading ? "Registering..." : "Register"}
         </button>
+
+        {/* Back to Home */}
+        <button
+          type="button"
+          onClick={() => router.push("/")}
+          className="block mt-2 text-sm text-gray-400 hover:underline text-center w-full"
+        >
+          ← Back to Home
+        </button>
       </form>
     </div>
   );
