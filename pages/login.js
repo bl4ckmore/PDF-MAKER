@@ -1,9 +1,13 @@
-// pages/login.js
+// 📁 pages/login.js
 import { useState } from "react";
-import Link from "next/link";
+import axios from "axios";
+import { useRouter } from "next/router";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const router = useRouter();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -11,51 +15,68 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add login logic here
-    alert("Login logic goes here 🚀");
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await axios.post("https://pdfapi-si07.onrender.com/api/auth/login", form);
+
+      if (res.data.success) {
+        alert("✅ Login successful!");
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        router.push("/"); // Go to home after login
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-6">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-gray-800 p-6 rounded w-full max-w-md space-y-4"
-      >
-        <h2 className="text-2xl font-bold text-center">Log In</h2>
+    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-6">
+      <form onSubmit={handleSubmit} className="bg-gray-800 p-6 rounded w-full max-w-md space-y-4 shadow-md">
+        <h2 className="text-2xl font-bold mb-4 text-center">Log In</h2>
 
         <input
           type="email"
           name="email"
           placeholder="Email"
-          value={form.email}
           onChange={handleChange}
-          className="w-full p-2 rounded bg-gray-700 text-white"
+          value={form.email}
           required
+          className="w-full p-2 rounded bg-gray-700 text-white"
         />
 
         <input
           type="password"
           name="password"
           placeholder="Password"
-          value={form.password}
           onChange={handleChange}
-          className="w-full p-2 rounded bg-gray-700 text-white"
+          value={form.password}
           required
+          className="w-full p-2 rounded bg-gray-700 text-white"
         />
+
+        {error && <p className="text-red-400 text-sm">{error}</p>}
 
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
+          disabled={loading}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
         >
-          Log In
+          {loading ? "Logging in..." : "Log In"}
         </button>
 
-        <Link
-          href="/"
-          className="block text-sm text-gray-400 text-center hover:underline"
+        <button
+          type="button"
+          onClick={() => router.push("/")}
+          className="w-full mt-2 text-sm text-gray-400 hover:underline"
         >
-          ← Back to Home
-        </Link>
+          ← Back
+        </button>
       </form>
     </div>
   );
