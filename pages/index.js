@@ -42,46 +42,45 @@ export default function Home() {
 
   const handleFileChange = async (e) => {
     const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
     setFile(selectedFile);
     setOriginalText("");
 
-    if (selectedFile) {
-      const formData = new FormData();
-      formData.append("pdf", selectedFile);
+    const formData = new FormData();
+    formData.append("pdf", selectedFile);
 
-      try {
-        const res = await axios.post(`${API_BASE_URL}/api/pdf/extract-text`, formData);
-        setOriginalText(res.data.text);
-        renderPDFPreview(selectedFile);
-      } catch (err) {
-        console.error("Error extracting text:", err);
-        alert("Failed to preview PDF content");
-      }
+    try {
+      const res = await axios.post(`${API_BASE_URL}/api/pdf/extract-text`, formData);
+      setOriginalText(res.data.text);
+      renderPDFPreview(selectedFile);
+    } catch (err) {
+      console.error("Error extracting text:", err);
+      alert("❌ Failed to preview PDF content");
     }
   };
 
   const renderPDFPreview = async (pdfFile) => {
-    const fileReader = new FileReader();
-    fileReader.onload = async function () {
-      const typedArray = new Uint8Array(this.result);
-      const pdf = await pdfjsLib.getDocument(typedArray).promise;
-      const page = await pdf.getPage(1);
+    try {
+      const fileReader = new FileReader();
+      fileReader.onload = async function () {
+        const typedArray = new Uint8Array(this.result);
+        const pdf = await pdfjsLib.getDocument(typedArray).promise;
+        const page = await pdf.getPage(1);
 
-      const canvas = canvasRef.current;
-      const context = canvas.getContext("2d");
-      const viewport = page.getViewport({ scale: 0.6 });
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
+        const canvas = canvasRef.current;
+        const context = canvas.getContext("2d");
+        const viewport = page.getViewport({ scale: 0.6 });
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
 
-      const renderContext = {
-        canvasContext: context,
-        viewport: viewport,
+        await page.render({ canvasContext: context, viewport }).promise;
       };
 
-      await page.render(renderContext).promise;
-    };
-
-    fileReader.readAsArrayBuffer(pdfFile);
+      fileReader.readAsArrayBuffer(pdfFile);
+    } catch (error) {
+      console.error("PDF Preview Error:", error);
+    }
   };
 
   const handleUpload = async () => {
@@ -97,7 +96,13 @@ export default function Home() {
 
     setLoading(true);
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/pdf/replace-text`, formData);
+      const token = localStorage.getItem("token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const res = await axios.post(`${API_BASE_URL}/api/pdf/replace-text`, formData, {
+        headers,
+      });
+
       setUpdatedFile(`${API_BASE_URL}/pdf/${res.data.filename}`);
     } catch (err) {
       console.error("Upload Error:", err);
@@ -137,11 +142,9 @@ export default function Home() {
 
         {/* Mobile Nav */}
         <div className="md:hidden">
-          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">
-            ☰
-          </button>
+          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">☰</button>
           {showMobileMenu && (
-            <div className="md:hidden bg-gray-800 w-full text-center p-4 space-y-2">
+            <div className="bg-gray-800 w-full text-center p-4 space-y-2">
               <a href="#" className="block hover:underline">Home</a>
               <a href="#" className="block hover:underline">Upload</a>
               {!user ? (
@@ -160,7 +163,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* MAIN CONTENT */}
+      {/* Main UI */}
       <div className="pt-24 w-full flex justify-center">
         {!showEditor ? (
           <div className="text-center space-y-4">
@@ -176,6 +179,7 @@ export default function Home() {
         ) : (
           <div className="w-full max-w-xl space-y-4">
             <h2 className="text-xl font-bold">📄 PDF Text Editor</h2>
+
             <input
               type="file"
               accept="application/pdf"
@@ -183,6 +187,7 @@ export default function Home() {
               className="w-full p-2 bg-gray-800 rounded"
             />
 
+            {/* Canvas */}
             <div className="flex justify-center">
               <canvas
                 ref={canvasRef}
