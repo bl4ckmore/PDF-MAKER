@@ -118,6 +118,7 @@ export default function Home() {
           PDF Editor
         </button>
 
+        {/* Desktop Nav */}
         <div className="hidden md:flex gap-4">
           <a href="#" className="hover:underline">Home</a>
           <a href="#" className="hover:underline">Upload</a>
@@ -127,10 +128,14 @@ export default function Home() {
               <Link href="/register" className="hover:underline">Register</Link>
             </>
           ) : (
-            <button onClick={handleLogout} className="hover:underline text-red-400">Logout</button>
+            <>
+              <Link href="/dashboard" className="hover:underline">Dashboard</Link>
+              <button onClick={handleLogout} className="hover:underline text-red-400">Logout</button>
+            </>
           )}
         </div>
 
+        {/* Mobile Nav */}
         <div className="md:hidden">
           <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">
             ☰
@@ -145,13 +150,17 @@ export default function Home() {
                   <Link href="/register" className="block hover:underline">Register</Link>
                 </>
               ) : (
-                <button onClick={handleLogout} className="block text-red-400 hover:underline">Logout</button>
+                <>
+                  <Link href="/dashboard" className="block hover:underline">Dashboard</Link>
+                  <button onClick={handleLogout} className="block text-red-400 hover:underline">Logout</button>
+                </>
               )}
             </div>
           )}
         </div>
       </nav>
 
+      {/* MAIN CONTENT */}
       <div className="pt-24 w-full flex justify-center">
         {!showEditor ? (
           <div className="text-center space-y-4">
@@ -174,7 +183,6 @@ export default function Home() {
               className="w-full p-2 bg-gray-800 rounded"
             />
 
-            {/* Canvas Preview */}
             <div className="flex justify-center">
               <canvas
                 ref={canvasRef}
