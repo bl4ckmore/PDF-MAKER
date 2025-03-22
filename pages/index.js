@@ -11,7 +11,8 @@ export default function Home() {
   const [originalText, setOriginalText] = useState("");
   const [loading, setLoading] = useState(false);
   const [updatedFile, setUpdatedFile] = useState(null);
-
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  
   const handleShowEditor = () => setShowEditor(true);
   const handleBack = () => setShowEditor(false);
 
@@ -66,17 +67,36 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-6">
-      <nav className="w-full flex items-center justify-between p-4 bg-gray-800 fixed top-0 left-0">
-        <button onClick={() => window.location.reload()} className="text-lg font-bold">
-          PDF Editor
-        </button>
-        <div className="hidden md:flex gap-4">
-          <a href="#" className="hover:underline">Home</a>
-          <a href="#" className="hover:underline">Upload</a>
-          <a href="#" className="hover:underline">History</a>
-          <a href="#" className="hover:underline">About</a>
-        </div>
-      </nav>
+      <nav className="w-full flex items-center justify-between p-4 bg-gray-800 fixed top-0 left-0 z-10">
+  <button onClick={() => window.location.reload()} className="text-lg font-bold">
+    PDF Editor
+  </button>
+
+  {/* Desktop Nav */}
+  <div className="hidden md:flex gap-4">
+    <a href="#" className="hover:underline">Home</a>
+    <a href="#" className="hover:underline">Upload</a>
+    <a href="#" className="hover:underline">History</a>
+    <a href="#" className="hover:underline">About</a>
+  </div>
+
+  {/* Mobile Burger */}
+  <div className="md:hidden">
+    <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">
+      ☰
+    </button>
+    {/* Mobile Menu */}
+{showMobileMenu && (
+  <div className="md:hidden bg-gray-800 w-full text-center p-4 space-y-2">
+    <a href="#" className="block hover:underline">Home</a>
+    <a href="#" className="block hover:underline">Upload</a>
+    <a href="#" className="block hover:underline">History</a>
+    <a href="#" className="block hover:underline">About</a>
+  </div>
+)}
+
+  </div>
+</nav>
 
       <div className="pt-24 w-full flex justify-center">
         {!showEditor ? (
