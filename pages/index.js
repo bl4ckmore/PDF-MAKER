@@ -51,56 +51,81 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-6">
-      <h1 className="text-3xl font-bold mb-6">📄 PDF Text Editor</h1>
-
-      <input
-        type="file"
-        accept="application/pdf"
-        onChange={handleFileChange}
-        className="mb-4 p-2 w-full max-w-lg bg-gray-800 border border-gray-600 rounded-md"
-      />
-
-      {previewUrl && (
-        <iframe
-          src={previewUrl}
-          className="w-full max-w-lg h-72 border border-gray-700 rounded mb-4"
-        ></iframe>
-      )}
-
-      <input
-        type="text"
-        placeholder="Text to find"
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        className="mb-3 p-2 w-full max-w-lg bg-gray-800 border border-gray-600 rounded text-white"
-      />
-
-      <input
-        type="text"
-        placeholder="Replace with"
-        value={replaceText}
-        onChange={(e) => setReplaceText(e.target.value)}
-        className="mb-4 p-2 w-full max-w-lg bg-gray-800 border border-gray-600 rounded text-white"
-      />
-
-      <button
-        onClick={handleUpload}
-        disabled={loading}
-        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-semibold disabled:bg-gray-600"
-      >
-        {loading ? "Processing..." : "Upload & Replace Text"}
-      </button>
-
-      {updatedFile && (
-        <a
-          href={`${API_BASE_URL}/pdf/${updatedFile}`}
-          download
-          className="mt-6 inline-block px-6 py-2 bg-green-600 hover:bg-green-700 rounded text-white font-semibold"
+    <div className="bg-gray-900 min-h-screen text-white font-sans">
+      {/* 🔥 Navbar */}
+      <nav className="flex items-center justify-between p-4 bg-gray-800 shadow-md">
+        <h1 className="text-xl font-bold">PDF Editor</h1>
+        <button
+          id="burgerBtn"
+          className="md:hidden focus:outline-none"
+          aria-label="Open Menu"
         >
-          Download Updated PDF
-        </a>
-      )}
+          <svg
+            className="w-6 h-6 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            ></path>
+          </svg>
+        </button>
+  
+        {/* ✅ Desktop Nav */}
+        <ul className="hidden md:flex space-x-6 text-white font-medium">
+          <li><a href="#" className="hover:text-blue-400">Home</a></li>
+          <li><a href="#" className="hover:text-blue-400">Upload</a></li>
+          <li><a href="#" className="hover:text-blue-400">History</a></li>
+          <li><a href="#" className="hover:text-blue-400">About</a></li>
+        </ul>
+      </nav>
+  
+      {/* ✅ Mobile Menu */}
+      <div
+        id="mobileMenu"
+        className="md:hidden fixed top-0 right-0 w-64 h-full bg-gray-800 text-white transform translate-x-full transition-transform z-50 shadow-lg p-6"
+      >
+        <button
+          id="closeBtn"
+          className="absolute top-4 right-4 text-white focus:outline-none"
+        >
+          ✕
+        </button>
+        <ul className="mt-12 space-y-4 text-lg font-medium">
+          <li><a href="#" className="block hover:text-blue-400">Home</a></li>
+          <li><a href="#" className="block hover:text-blue-400">Upload</a></li>
+          <li><a href="#" className="block hover:text-blue-400">History</a></li>
+          <li><a href="#" className="block hover:text-blue-400">About</a></li>
+        </ul>
+      </div>
+  
+      {/* Your existing content like file upload, input, etc */}
+      <main className="p-6">{/* Your form UI here */}</main>
+  
+      {/* JS Toggle */}
+      <script dangerouslySetInnerHTML={{
+        __html: `
+          document.addEventListener('DOMContentLoaded', function () {
+            const burgerBtn = document.getElementById("burgerBtn");
+            const mobileMenu = document.getElementById("mobileMenu");
+            const closeBtn = document.getElementById("closeBtn");
+  
+            burgerBtn.addEventListener("click", () => {
+              mobileMenu.classList.remove("translate-x-full");
+            });
+  
+            closeBtn.addEventListener("click", () => {
+              mobileMenu.classList.add("translate-x-full");
+            });
+          });
+        `,
+      }} />
     </div>
   );
+  
 }
