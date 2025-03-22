@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-// 🔗 Your deployed backend URL
+// Backend URL
 const API_BASE_URL = "https://pdfapi-si07.onrender.com";
 
 export default function Home() {
@@ -11,12 +11,11 @@ export default function Home() {
   const [replaceText, setReplaceText] = useState("");
   const [updatedFile, setUpdatedFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
 
-  // ⛏ Handle file input
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (!selectedFile) return;
-
     setFile(selectedFile);
     setPreviewUrl(URL.createObjectURL(selectedFile));
   };
@@ -48,7 +47,6 @@ export default function Home() {
     }
   };
 
-  // 🧠 Burger toggle
   useEffect(() => {
     const burgerBtn = document.getElementById("burgerBtn");
     const mobileMenu = document.getElementById("mobileMenu");
@@ -62,7 +60,7 @@ export default function Home() {
 
   return (
     <div className="bg-gray-900 text-white min-h-screen font-sans">
-      {/* ✅ Navbar */}
+      {/* 🧭 Navbar */}
       <nav className="flex items-center justify-between p-4 bg-gray-800 shadow-md">
         <h1 className="text-xl font-bold">PDF Editor</h1>
         <button
@@ -89,7 +87,7 @@ export default function Home() {
         </ul>
       </nav>
 
-      {/* ✅ Mobile menu */}
+      {/* 📱 Mobile menu */}
       <div
         id="mobileMenu"
         className="md:hidden fixed top-0 right-0 w-64 h-full bg-gray-800 text-white transform translate-x-full transition-transform z-50 shadow-lg p-6"
@@ -103,54 +101,67 @@ export default function Home() {
         </ul>
       </div>
 
-      {/* 🧠 Main UI */}
-      <main className="flex flex-col items-center p-6 mt-4">
-        <input
-          type="file"
-          accept="application/pdf"
-          onChange={handleFileChange}
-          className="mb-4 p-2 w-full max-w-lg bg-gray-800 border border-gray-600 rounded"
-        />
-
-        {previewUrl && (
-          <iframe
-            src={previewUrl}
-            className="w-full max-w-lg h-72 border border-gray-700 rounded mb-4"
-          ></iframe>
+      {/* 🧠 Main content */}
+      <main className="flex flex-col items-center justify-center p-6 mt-10">
+        {!showEditor && (
+          <button
+            onClick={() => setShowEditor(true)}
+            className="text-xl px-10 py-4 bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition-all"
+          >
+            ✏️ Edit Now!
+          </button>
         )}
 
-        <input
-          type="text"
-          placeholder="Text to find"
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          className="mb-3 p-2 w-full max-w-lg bg-gray-800 border border-gray-600 rounded"
-        />
+        {showEditor && (
+          <div className="w-full max-w-2xl mt-10 transition-all">
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={handleFileChange}
+              className="mb-4 p-2 w-full bg-gray-800 border border-gray-600 rounded"
+            />
 
-        <input
-          type="text"
-          placeholder="Replace with"
-          value={replaceText}
-          onChange={(e) => setReplaceText(e.target.value)}
-          className="mb-4 p-2 w-full max-w-lg bg-gray-800 border border-gray-600 rounded"
-        />
+            {previewUrl && (
+              <iframe
+                src={previewUrl}
+                className="w-full h-72 border border-gray-700 rounded mb-4"
+              ></iframe>
+            )}
 
-        <button
-          onClick={handleUpload}
-          disabled={loading}
-          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded disabled:bg-gray-600"
-        >
-          {loading ? "Processing..." : "Upload & Replace Text"}
-        </button>
+            <input
+              type="text"
+              placeholder="Text to find"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="mb-3 p-2 w-full bg-gray-800 border border-gray-600 rounded"
+            />
 
-        {updatedFile && (
-          <a
-            href={`${API_BASE_URL}/pdf/${updatedFile}`}
-            download
-            className="mt-6 inline-block px-6 py-2 bg-green-600 hover:bg-green-700 rounded text-white font-semibold"
-          >
-            Download Updated PDF
-          </a>
+            <input
+              type="text"
+              placeholder="Replace with"
+              value={replaceText}
+              onChange={(e) => setReplaceText(e.target.value)}
+              className="mb-4 p-2 w-full bg-gray-800 border border-gray-600 rounded"
+            />
+
+            <button
+              onClick={handleUpload}
+              disabled={loading}
+              className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded disabled:bg-gray-600"
+            >
+              {loading ? "Processing..." : "Upload & Replace Text"}
+            </button>
+
+            {updatedFile && (
+              <a
+                href={`${API_BASE_URL}/pdf/${updatedFile}`}
+                download
+                className="mt-6 inline-block px-6 py-2 bg-yellow-600 hover:bg-yellow-700 rounded text-white font-semibold"
+              >
+                📥 Download Updated PDF
+              </a>
+            )}
+          </div>
         )}
       </main>
     </div>
