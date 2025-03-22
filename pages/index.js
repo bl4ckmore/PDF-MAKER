@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import * as pdfjsLib from "pdfjs-dist";
+import Link from "next/link";
 
 const API_BASE_URL = "https://pdfapi-si07.onrender.com";
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
@@ -55,7 +56,7 @@ export default function Home() {
 
       const canvas = canvasRef.current;
       const context = canvas.getContext("2d");
-      const viewport = page.getViewport({ scale: 0.8 });
+      const viewport = page.getViewport({ scale: 0.6 });
       canvas.height = viewport.height;
       canvas.width = viewport.width;
 
@@ -100,15 +101,15 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-6">
       <nav className="w-full flex items-center justify-between p-4 bg-gray-800 fixed top-0 left-0 z-10">
-        <button onClick={() => window.location.reload()} className="text-lg font-bold">
+        <button onClick={() => window.location.href = '/'} className="text-lg font-bold">
           PDF Editor
         </button>
 
         <div className="hidden md:flex gap-4">
           <a href="#" className="hover:underline">Home</a>
           <a href="#" className="hover:underline">Upload</a>
-          <a href="#" className="hover:underline">Log In</a>
-          <a href="#" className="hover:underline">Register</a>
+          <Link href="/login" className="hover:underline">Log In</Link>
+          <Link href="/register" className="hover:underline">Register</Link>
         </div>
 
         <div className="md:hidden">
@@ -119,8 +120,8 @@ export default function Home() {
             <div className="md:hidden bg-gray-800 w-full text-center p-4 space-y-2">
               <a href="#" className="block hover:underline">Home</a>
               <a href="#" className="block hover:underline">Upload</a>
-              <a href="#" className="block hover:underline">Log In</a>
-              <a href="#" className="block hover:underline">Register</a>
+              <Link href="/login" className="block hover:underline">Log In</Link>
+              <Link href="/register" className="block hover:underline">Register</Link>
             </div>
           )}
         </div>
@@ -150,7 +151,11 @@ export default function Home() {
 
             {/* Canvas Preview */}
             <div className="flex justify-center">
-              <canvas ref={canvasRef} className="my-4 rounded shadow-md" style={{ width: "100%", maxWidth: "400px" }} />
+              <canvas
+                ref={canvasRef}
+                className="my-4 rounded shadow-md border border-gray-600"
+                style={{ width: "100%", maxWidth: "280px" }}
+              />
             </div>
 
             <input
