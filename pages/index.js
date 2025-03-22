@@ -19,15 +19,15 @@ export default function Home() {
   const handleShowEditor = () => setShowEditor(true);
   const handleBack = () => setShowEditor(false);
 
-  const renderPDF = async (pdfBuffer) => {
-    const pdf = await pdfjsLib.getDocument({ data: pdfBuffer }).promise;
+  const renderPDF = async (arrayBuffer) => {
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     const page = await pdf.getPage(1);
     const viewport = page.getViewport({ scale: 0.6 });
 
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
-    canvas.height = viewport.height;
     canvas.width = viewport.width;
+    canvas.height = viewport.height;
 
     await page.render({ canvasContext: context, viewport }).promise;
   };
@@ -36,10 +36,11 @@ export default function Home() {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
     setOriginalText("");
+    setUpdatedFile("");
 
     if (selectedFile) {
       const arrayBuffer = await selectedFile.arrayBuffer();
-      renderPDF(arrayBuffer);
+      await renderPDF(arrayBuffer);
 
       const formData = new FormData();
       formData.append("pdf", selectedFile);
@@ -48,8 +49,8 @@ export default function Home() {
         const res = await axios.post(`${API_BASE_URL}/api/pdf/extract-text`, formData);
         setOriginalText(res.data.text);
       } catch (err) {
-        console.error("Text extract error:", err);
-        alert("Failed to extract text from PDF.");
+        console.error("Error extracting text:", err);
+        alert("Failed to preview PDF text");
       }
     }
   };
@@ -136,9 +137,8 @@ export default function Home() {
               className="w-full p-2 bg-gray-800 rounded"
             />
 
-            {/* Canvas Preview */}
             <div className="mt-4">
-              <canvas ref={canvasRef} className="border border-gray-700 rounded w-full max-h-[350px]" />
+              <canvas ref={canvasRef} className="rounded border border-gray-700 max-w-full mx-auto" />
             </div>
 
             <input
