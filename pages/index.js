@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-// Backend URL
 const API_BASE_URL = "https://pdfapi-si07.onrender.com";
 
 export default function Home() {
@@ -59,8 +58,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen font-sans">
-      {/* 🧭 Navbar */}
+    <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white min-h-screen font-sans">
       <nav className="flex items-center justify-between p-4 bg-gray-800 shadow-md">
         <h1 className="text-xl font-bold">PDF Editor</h1>
         <button
@@ -87,7 +85,6 @@ export default function Home() {
         </ul>
       </nav>
 
-      {/* 📱 Mobile menu */}
       <div
         id="mobileMenu"
         className="md:hidden fixed top-0 right-0 w-64 h-full bg-gray-800 text-white transform translate-x-full transition-transform z-50 shadow-lg p-6"
@@ -101,19 +98,25 @@ export default function Home() {
         </ul>
       </div>
 
-      {/* 🧠 Main content */}
-      <main className="flex flex-col items-center justify-center p-6 mt-10">
+      <main className="flex flex-col items-center justify-center p-6 mt-10 animate-fadeIn">
         {!showEditor && (
           <button
             onClick={() => setShowEditor(true)}
-            className="text-xl px-10 py-4 bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition-all"
+            className="text-2xl px-10 py-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-lg transition-all animate-bounce"
           >
-            ✏️ Edit Now!
+            🚀 Edit Now!
           </button>
         )}
 
         {showEditor && (
-          <div className="w-full max-w-2xl mt-10 transition-all">
+          <div className="w-full max-w-2xl mt-10 transition-all duration-500 ease-in-out">
+            <button
+              onClick={() => setShowEditor(false)}
+              className="mb-4 px-4 py-2 bg-red-600 hover:bg-red-700 rounded"
+            >
+              ❌ Close Editor
+            </button>
+
             <input
               type="file"
               accept="application/pdf"
