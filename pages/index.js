@@ -15,7 +15,20 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [updatedFile, setUpdatedFile] = useState(null);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [user, setUser] = useState(null);
   const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) setUser(JSON.parse(storedUser));
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setUser(null);
+    window.location.reload();
+  };
 
   const handleShowEditor = () => setShowEditor(true);
   const handleBack = () => {
@@ -108,8 +121,14 @@ export default function Home() {
         <div className="hidden md:flex gap-4">
           <a href="#" className="hover:underline">Home</a>
           <a href="#" className="hover:underline">Upload</a>
-          <Link href="/login" className="hover:underline">Log In</Link>
-          <Link href="/register" className="hover:underline">Register</Link>
+          {!user ? (
+            <>
+              <Link href="/login" className="hover:underline">Log In</Link>
+              <Link href="/register" className="hover:underline">Register</Link>
+            </>
+          ) : (
+            <button onClick={handleLogout} className="hover:underline text-red-400">Logout</button>
+          )}
         </div>
 
         <div className="md:hidden">
@@ -120,8 +139,14 @@ export default function Home() {
             <div className="md:hidden bg-gray-800 w-full text-center p-4 space-y-2">
               <a href="#" className="block hover:underline">Home</a>
               <a href="#" className="block hover:underline">Upload</a>
-              <Link href="/login" className="block hover:underline">Log In</Link>
-              <Link href="/register" className="block hover:underline">Register</Link>
+              {!user ? (
+                <>
+                  <Link href="/login" className="block hover:underline">Log In</Link>
+                  <Link href="/register" className="block hover:underline">Register</Link>
+                </>
+              ) : (
+                <button onClick={handleLogout} className="block text-red-400 hover:underline">Logout</button>
+              )}
             </div>
           )}
         </div>
