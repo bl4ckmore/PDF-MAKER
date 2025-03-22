@@ -30,7 +30,15 @@ export default function Home() {
     window.location.reload();
   };
 
-  const handleShowEditor = () => setShowEditor(true);
+  const handleShowEditor = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("🚫 Please log in to edit PDFs");
+      window.location.href = "/login";
+      return;
+    }
+    setShowEditor(true);
+  };
   const handleBack = () => {
     setShowEditor(false);
     setOriginalText("");
