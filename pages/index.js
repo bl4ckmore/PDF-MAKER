@@ -205,7 +205,7 @@ export default function Home() {
               onClick={handleBack}
               className="block mt-2 text-sm text-gray-400 hover:underline"
             >
-              ← Back
+              ← Back to Home
             </button>
           </div>
         )}
