@@ -12,14 +12,14 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [updatedFile, setUpdatedFile] = useState(null);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  
+
   const handleShowEditor = () => setShowEditor(true);
   const handleBack = () => setShowEditor(false);
 
   const handleFileChange = async (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
-    setOriginalText(""); // reset preview
+    setOriginalText("");
 
     if (selectedFile) {
       const formData = new FormData();
@@ -58,7 +58,6 @@ export default function Home() {
     }
   };
 
-  // Generate preview text after replacement
   const getModifiedPreview = () => {
     return originalText
       ? originalText.replace(new RegExp(searchText, "g"), replaceText)
@@ -67,37 +66,38 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-6">
+      {/* Nav */}
       <nav className="w-full flex items-center justify-between p-4 bg-gray-800 fixed top-0 left-0 z-10">
-  <button onClick={() => window.location.reload()} className="text-lg font-bold">
-    PDF Editor
-  </button>
+        <button onClick={() => window.location.reload()} className="text-lg font-bold">
+          PDF Editor
+        </button>
 
-  {/* Desktop Nav */}
-  <div className="hidden md:flex gap-4">
-    <a href="#" className="hover:underline">Home</a>
-    <a href="#" className="hover:underline">Upload</a>
-    <a href="#" className="hover:underline">History</a>
-    <a href="#" className="hover:underline">About</a>
-  </div>
+        <div className="hidden md:flex gap-4">
+          <a href="#" className="hover:underline">Home</a>
+          <a href="#" className="hover:underline">Upload</a>
+          <a href="#" className="hover:underline">History</a>
+          <a href="#" className="hover:underline">About</a>
+        </div>
 
-  {/* Mobile Burger */}
-  <div className="md:hidden">
-    <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">
-      ☰
-    </button>
-    {/* Mobile Menu */}
-{showMobileMenu && (
-  <div className="md:hidden bg-gray-800 w-full text-center p-4 space-y-2">
-    <a href="#" className="block hover:underline">Home</a>
-    <a href="#" className="block hover:underline">Upload</a>
-    <a href="#" className="block hover:underline">History</a>
-    <a href="#" className="block hover:underline">About</a>
-  </div>
-)}
+        {/* Burger icon */}
+        <div className="md:hidden">
+          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">
+            ☰
+          </button>
+        </div>
+      </nav>
 
-  </div>
-</nav>
+      {/* Mobile menu */}
+      {showMobileMenu && (
+        <div className="md:hidden bg-gray-800 w-full text-center p-4 space-y-2 mt-16">
+          <a href="#" className="block hover:underline">Home</a>
+          <a href="#" className="block hover:underline">Upload</a>
+          <a href="#" className="block hover:underline">History</a>
+          <a href="#" className="block hover:underline">About</a>
+        </div>
+      )}
 
+      {/* Main section */}
       <div className="pt-24 w-full flex justify-center">
         {!showEditor ? (
           <div className="text-center space-y-4">
@@ -138,7 +138,7 @@ export default function Home() {
               className="w-full p-2 bg-gray-800 rounded"
             />
 
-            {/* Mini Preview */}
+            {/* Preview Section */}
             {originalText && (
               <div className="mt-4 bg-gray-800 p-4 rounded text-sm max-h-64 overflow-auto">
                 <h3 className="font-semibold text-green-400 mb-1">Original Preview:</h3>
