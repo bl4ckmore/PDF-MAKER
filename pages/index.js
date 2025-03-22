@@ -1,8 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import * as pdfjsLib from "pdfjs-dist";
-import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+import * as pdfjsLib from "pdfjs-dist/build/pdf";
+import "pdfjs-dist/build/pdf.worker";
 
 const API_BASE_URL = "https://pdfapi-si07.onrender.com";
 
@@ -15,11 +14,23 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [updatedFile, setUpdatedFile] = useState(null);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-
   const canvasRef = useRef(null);
 
   const handleShowEditor = () => setShowEditor(true);
   const handleBack = () => setShowEditor(false);
+
+  const renderPDF = async (pdfBuffer) => {
+    const pdf = await pdfjsLib.getDocument({ data: pdfBuffer }).promise;
+    const page = await pdf.getPage(1);
+    const viewport = page.getViewport({ scale: 0.6 });
+
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    await page.render({ canvasContext: context, viewport }).promise;
+  };
 
   const handleFileChange = async (e) => {
     const selectedFile = e.target.files[0];
@@ -27,6 +38,9 @@ export default function Home() {
     setOriginalText("");
 
     if (selectedFile) {
+      const arrayBuffer = await selectedFile.arrayBuffer();
+      renderPDF(arrayBuffer);
+
       const formData = new FormData();
       formData.append("pdf", selectedFile);
 
@@ -34,8 +48,8 @@ export default function Home() {
         const res = await axios.post(`${API_BASE_URL}/api/pdf/extract-text`, formData);
         setOriginalText(res.data.text);
       } catch (err) {
-        console.error("Error extracting text:", err);
-        alert("Failed to preview PDF content");
+        console.error("Text extract error:", err);
+        alert("Failed to extract text from PDF.");
       }
     }
   };
@@ -69,40 +83,8 @@ export default function Home() {
       : "";
   };
 
-  useEffect(() => {
-    const renderPDF = async () => {
-      if (!file || !canvasRef.current) return;
-
-      const fileReader = new FileReader();
-      fileReader.onload = async function () {
-        const typedArray = new Uint8Array(this.result);
-        const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
-        const page = await pdf.getPage(1);
-
-        const viewport = page.getViewport({ scale: 1.5 });
-        const canvas = canvasRef.current;
-        const context = canvas.getContext("2d");
-
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-
-        const renderContext = {
-          canvasContext: context,
-          viewport: viewport,
-        };
-
-        await page.render(renderContext).promise;
-      };
-
-      fileReader.readAsArrayBuffer(file);
-    };
-
-    renderPDF();
-  }, [file]);
-
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-6">
-      {/* Navigation */}
       <nav className="w-full flex items-center justify-between p-4 bg-gray-800 fixed top-0 left-0 z-10">
         <button onClick={() => window.location.reload()} className="text-lg font-bold">
           PDF Editor
@@ -119,24 +101,23 @@ export default function Home() {
           <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">
             ☰
           </button>
+          {showMobileMenu && (
+            <div className="md:hidden bg-gray-800 w-full text-center p-4 space-y-2 absolute right-0 mt-2">
+              <a href="#" className="block hover:underline">Home</a>
+              <a href="#" className="block hover:underline">Upload</a>
+              <a href="#" className="block hover:underline">History</a>
+              <a href="#" className="block hover:underline">About</a>
+            </div>
+          )}
         </div>
       </nav>
-
-      {/* Mobile Menu */}
-      {showMobileMenu && (
-        <div className="md:hidden bg-gray-800 w-full text-center p-4 space-y-2 mt-16">
-          <a href="#" className="block hover:underline">Home</a>
-          <a href="#" className="block hover:underline">Upload</a>
-          <a href="#" className="block hover:underline">History</a>
-          <a href="#" className="block hover:underline">About</a>
-        </div>
-      )}
 
       <div className="pt-24 w-full flex justify-center">
         {!showEditor ? (
           <div className="text-center space-y-4">
             <h1 className="text-3xl font-bold">Online PDF Editor</h1>
             <p className="text-gray-400">Add text, annotate, fill and edit PDFs online</p>
+
             <button
               onClick={handleShowEditor}
               className="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded text-white font-semibold"
@@ -145,7 +126,7 @@ export default function Home() {
             </button>
           </div>
         ) : (
-          <div className="w-full max-w-xl space-y-4">
+          <div className="w-full max-w-2xl space-y-4">
             <h2 className="text-xl font-bold">📄 PDF Text Editor</h2>
 
             <input
@@ -154,6 +135,11 @@ export default function Home() {
               onChange={handleFileChange}
               className="w-full p-2 bg-gray-800 rounded"
             />
+
+            {/* Canvas Preview */}
+            <div className="mt-4">
+              <canvas ref={canvasRef} className="border border-gray-700 rounded w-full max-h-[350px]" />
+            </div>
 
             <input
               type="text"
@@ -171,15 +157,6 @@ export default function Home() {
               className="w-full p-2 bg-gray-800 rounded"
             />
 
-            {/* Canvas PDF Preview */}
-            {file && (
-              <canvas
-                ref={canvasRef}
-                className="w-full border border-gray-700 rounded mt-4"
-              ></canvas>
-            )}
-
-            {/* Text Preview */}
             {originalText && (
               <div className="mt-4 bg-gray-800 p-4 rounded text-sm max-h-64 overflow-auto">
                 <h3 className="font-semibold text-green-400 mb-1">Original Preview:</h3>
