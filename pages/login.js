@@ -19,10 +19,12 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await axios.post("https://pdfapi-si07.onrender.com/api/auth/login", form);
+      const res = await axios.post(
+        "https://pdfapi-si07.onrender.com/api/auth/login",
+        form
+      );
 
       if (res.data.success) {
-        alert("✅ Login successful!");
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("user", JSON.stringify(res.data.user));
         router.push("/"); // Go to home after login
@@ -37,7 +39,10 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-6">
-      <form onSubmit={handleSubmit} className="bg-gray-800 p-6 rounded w-full max-w-md space-y-4 shadow-md">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-gray-800 p-6 rounded w-full max-w-md space-y-4 shadow-md"
+      >
         <h2 className="text-2xl font-bold mb-4 text-center">Log In</h2>
 
         <input
