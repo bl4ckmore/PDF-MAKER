@@ -1,177 +1,64 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-
-const API_BASE_URL = "https://pdfapi-si07.onrender.com";
+import { useState } from "react";
 
 export default function Home() {
-  const [file, setFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [searchText, setSearchText] = useState("");
-  const [replaceText, setReplaceText] = useState("");
-  const [updatedFile, setUpdatedFile] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [showEditor, setShowEditor] = useState(false);
-
-  const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
-    if (!selectedFile) return;
-    setFile(selectedFile);
-    setPreviewUrl(URL.createObjectURL(selectedFile));
-  };
-
-  const handleUpload = async () => {
-    if (!file || !searchText.trim() || !replaceText.trim()) {
-      alert("Please upload a file and fill both text fields.");
-      return;
-    }
-
-    setLoading(true);
-    const formData = new FormData();
-    formData.append("pdf", file);
-    formData.append("searchText", searchText);
-    formData.append("replaceText", replaceText);
-
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/pdf/replace-text`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-      setUpdatedFile(response.data.filename);
-    } catch (error) {
-      console.error("❌ Upload error:", error);
-      alert("❌ Error replacing text in PDF.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const burgerBtn = document.getElementById("burgerBtn");
-    const mobileMenu = document.getElementById("mobileMenu");
-    const closeBtn = document.getElementById("closeBtn");
-
-    if (burgerBtn && mobileMenu && closeBtn) {
-      burgerBtn.onclick = () => mobileMenu.classList.remove("translate-x-full");
-      closeBtn.onclick = () => mobileMenu.classList.add("translate-x-full");
-    }
-  }, []);
+  const [showUploadMenu, setShowUploadMenu] = useState(false);
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white min-h-screen font-sans">
-      <nav className="flex items-center justify-between p-4 bg-gray-800 shadow-md">
-      <button
-  onClick={() => window.location.href = "/"}
-  className="text-xl font-bold text-white hover:text-blue-400 transition"
->
-  PDF Editor
-</button>
+    <div className="min-h-screen bg-gray-900 text-white p-6">
+      {/* Navbar */}
+      <nav className="flex items-center justify-between bg-gray-800 p-4">
         <button
-          id="burgerBtn"
-          className="md:hidden focus:outline-none"
-          aria-label="Open Menu"
+          onClick={() => window.location.href = "/"}
+          className="text-xl font-bold text-white hover:text-blue-400"
         >
-          <svg
-            className="w-6 h-6 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+          PDF Editor
         </button>
-
-        <ul className="hidden md:flex space-x-6 text-white font-medium">
-          <li><a href="#" className="hover:text-blue-400">Home</a></li>
-          <li><a href="#" className="hover:text-blue-400">Upload</a></li>
-          <li><a href="#" className="hover:text-blue-400">History</a></li>
-          <li><a href="#" className="hover:text-blue-400">About</a></li>
-        </ul>
+        <div className="space-x-4 hidden md:flex">
+          <a href="#" className="hover:text-blue-400">Home</a>
+          <a href="#" className="hover:text-blue-400">Upload</a>
+          <a href="#" className="hover:text-blue-400">History</a>
+          <a href="#" className="hover:text-blue-400">About</a>
+        </div>
       </nav>
 
-      <div
-        id="mobileMenu"
-        className="md:hidden fixed top-0 right-0 w-64 h-full bg-gray-800 text-white transform translate-x-full transition-transform z-50 shadow-lg p-6"
-      >
-        <button id="closeBtn" className="absolute top-4 right-4 text-white focus:outline-none">✕</button>
-        <ul className="mt-12 space-y-4 text-lg font-medium">
-          <li><a href="#" className="block hover:text-blue-400">Home</a></li>
-          <li><a href="#" className="block hover:text-blue-400">Upload</a></li>
-          <li><a href="#" className="block hover:text-blue-400">History</a></li>
-          <li><a href="#" className="block hover:text-blue-400">About</a></li>
-        </ul>
-      </div>
-
-      <main className="flex flex-col items-center justify-center p-6 mt-10 animate-fadeIn">
-        {!showEditor && (
+      {/* Center Button */}
+      {!showUploadMenu && (
+        <div className="flex justify-center items-center h-[calc(100vh-64px)]">
           <button
-            onClick={() => setShowEditor(true)}
-            className="text-2xl px-10 py-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-lg transition-all animate-bounce"
+            onClick={() => setShowUploadMenu(true)}
+            className="bg-blue-600 hover:bg-blue-700 px-8 py-4 text-white text-lg font-semibold rounded-lg shadow-lg transition"
           >
-            🚀 Edit Now!
+            Edit Now!
           </button>
-        )}
+        </div>
+      )}
 
-        {showEditor && (
-          <div className="w-full max-w-2xl mt-10 transition-all duration-500 ease-in-out">
-            <button
-              onClick={() => setShowEditor(false)}
-              className="mb-4 px-4 py-2 bg-red-600 hover:bg-red-700 rounded"
-            >
-              ❌ Close Editor
+      {/* Upload Menu */}
+      {showUploadMenu && (
+        <div className="flex justify-center items-center h-[calc(100vh-64px)]">
+          <div className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md text-center">
+            <img src="/pdf-icon.png" alt="PDF Icon" className="w-10 mx-auto mb-2" />
+            <h2 className="text-xl font-bold mb-2">Online PDF Editor</h2>
+            <p className="text-gray-400 mb-4">Add text, annotate, fill and edit PDFs online</p>
+
+            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-3 flex items-center justify-center gap-2">
+              <span className="material-icons">computer</span> Select File
             </button>
 
-            <input
-              type="file"
-              accept="application/pdf"
-              onChange={handleFileChange}
-              className="mb-4 p-2 w-full bg-gray-800 border border-gray-600 rounded"
-            />
-
-            {previewUrl && (
-              <iframe
-                src={previewUrl}
-                className="w-full h-72 border border-gray-700 rounded mb-4"
-              ></iframe>
-            )}
-
-            <input
-              type="text"
-              placeholder="Text to find"
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="mb-3 p-2 w-full bg-gray-800 border border-gray-600 rounded"
-            />
-
-            <input
-              type="text"
-              placeholder="Replace with"
-              value={replaceText}
-              onChange={(e) => setReplaceText(e.target.value)}
-              className="mb-4 p-2 w-full bg-gray-800 border border-gray-600 rounded"
-            />
-
-            <button
-              onClick={handleUpload}
-              disabled={loading}
-              className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded disabled:bg-gray-600"
-            >
-              {loading ? "Processing..." : "Upload & Replace Text"}
+            <button className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mb-2 flex items-center justify-center gap-2">
+              <img src="/xodo-icon.png" className="w-5 h-5" /> Xodo Drive
+            </button>
+            <button className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mb-2 flex items-center justify-center gap-2">
+              <img src="/dropbox-icon.png" className="w-5 h-5" /> Dropbox
+            </button>
+            <button className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mb-4 flex items-center justify-center gap-2">
+              <img src="/google-drive-icon.png" className="w-5 h-5" /> Google Drive
             </button>
 
-            {updatedFile && (
-              <a
-                href={`${API_BASE_URL}/pdf/${updatedFile}`}
-                download
-                className="mt-6 inline-block px-6 py-2 bg-yellow-600 hover:bg-yellow-700 rounded text-white font-semibold"
-              >
-                📥 Download Updated PDF
-              </a>
-            )}
+            <p className="text-gray-500">Or drop files here</p>
           </div>
-        )}
-      </main>
+        </div>
+      )}
     </div>
   );
 }
