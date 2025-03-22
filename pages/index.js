@@ -1,62 +1,71 @@
 import { useState } from "react";
 
 export default function Home() {
-  const [showUploadMenu, setShowUploadMenu] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
+
+  const handleShowEditor = () => {
+    setShowEditor(true);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
-      {/* Navbar */}
-      <nav className="flex items-center justify-between bg-gray-800 p-4">
-        <button
-          onClick={() => window.location.href = "/"}
-          className="text-xl font-bold text-white hover:text-blue-400"
-        >
-          PDF Editor
-        </button>
-        <div className="space-x-4 hidden md:flex">
-          <a href="#" className="hover:text-blue-400">Home</a>
-          <a href="#" className="hover:text-blue-400">Upload</a>
-          <a href="#" className="hover:text-blue-400">History</a>
-          <a href="#" className="hover:text-blue-400">About</a>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center">
+      {!showEditor ? (
+        <div className="flex flex-col items-center space-y-6">
+          <img src="/pdf-icon.png" className="w-16 h-16" alt="PDF Icon" />
+          <h1 className="text-2xl font-bold">Online PDF Editor</h1>
+          <p className="text-gray-300">
+            Add text, annotate, fill and edit PDFs online
+          </p>
 
-      {/* Center Button */}
-      {!showUploadMenu && (
-        <div className="flex justify-center items-center h-[calc(100vh-64px)]">
           <button
-            onClick={() => setShowUploadMenu(true)}
-            className="bg-blue-600 hover:bg-blue-700 px-8 py-4 text-white text-lg font-semibold rounded-lg shadow-lg transition"
+            onClick={handleShowEditor}
+            className="w-72 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
           >
-            Edit Now!
+            📁 Select File
           </button>
+
+          <button className="w-72 border border-gray-600 py-2 px-4 rounded flex items-center justify-center space-x-2">
+            <img src="/xodo-icon.png" className="w-5 h-5" alt="Xodo" />
+            <span>Xodo Drive</span>
+          </button>
+
+          <button className="w-72 border border-gray-600 py-2 px-4 rounded flex items-center justify-center space-x-2">
+            <img src="/dropbox-icon.png" className="w-5 h-5" alt="Dropbox" />
+            <span>Dropbox</span>
+          </button>
+
+          <button className="w-72 border border-gray-600 py-2 px-4 rounded flex items-center justify-center space-x-2">
+            <img src="/google-drive-icon.png" className="w-5 h-5" alt="Google Drive" />
+            <span>Google Drive</span>
+          </button>
+
+          <p className="text-sm text-gray-500 mt-4">Or drop files here</p>
         </div>
-      )}
+      ) : (
+        <div className="w-full max-w-2xl px-4">
+          <h2 className="text-2xl font-bold mb-4">📄 PDF Text Editor</h2>
 
-      {/* Upload Menu */}
-      {showUploadMenu && (
-        <div className="flex justify-center items-center h-[calc(100vh-64px)]">
-          <div className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md text-center">
-            <img src="/pdf-icon.png" alt="PDF Icon" className="w-10 mx-auto mb-2" />
-            <h2 className="text-xl font-bold mb-2">Online PDF Editor</h2>
-            <p className="text-gray-400 mb-4">Add text, annotate, fill and edit PDFs online</p>
+          <input
+            type="file"
+            accept="application/pdf"
+            className="mb-4 w-full bg-gray-800 text-white p-2 rounded"
+          />
 
-            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-3 flex items-center justify-center gap-2">
-              <span className="material-icons">computer</span> Select File
-            </button>
+          <input
+            type="text"
+            placeholder="Text to find"
+            className="mb-3 w-full bg-gray-800 text-white p-2 rounded"
+          />
 
-            <button className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mb-2 flex items-center justify-center gap-2">
-              <img src="/xodo-icon.png" className="w-5 h-5" /> Xodo Drive
-            </button>
-            <button className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mb-2 flex items-center justify-center gap-2">
-              <img src="/dropbox-icon.png" className="w-5 h-5" /> Dropbox
-            </button>
-            <button className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mb-4 flex items-center justify-center gap-2">
-              <img src="/google-drive-icon.png" className="w-5 h-5" /> Google Drive
-            </button>
+          <input
+            type="text"
+            placeholder="Replace with"
+            className="mb-3 w-full bg-gray-800 text-white p-2 rounded"
+          />
 
-            <p className="text-gray-500">Or drop files here</p>
-          </div>
+          <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded">
+            Replace Text
+          </button>
         </div>
       )}
     </div>
