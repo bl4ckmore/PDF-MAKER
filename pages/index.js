@@ -60,7 +60,12 @@ export default function Home() {
   return (
     <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white min-h-screen font-sans">
       <nav className="flex items-center justify-between p-4 bg-gray-800 shadow-md">
-        <h1 className="text-xl font-bold">PDF Editor</h1>
+      <button
+  onClick={() => window.location.href = "/"}
+  className="text-xl font-bold text-white hover:text-blue-400 transition"
+>
+  PDF Editor
+</button>
         <button
           id="burgerBtn"
           className="md:hidden focus:outline-none"
