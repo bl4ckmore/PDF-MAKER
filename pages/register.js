@@ -19,7 +19,7 @@ export default function Register() {
     setError(null);
 
     try {
-      const res = await axios.post("https://pdfapi-si07.onrender.com/api/auth/register", form);
+        const res = await axios.post("https://pdfapi-si07.onrender.com/api/auth/register", form);
       if (res.data.success) {
         alert("✅ Registered successfully!");
         router.push("/login");
