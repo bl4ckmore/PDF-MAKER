@@ -1,7 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import * as pdfjsLib from "pdfjs-dist";
-import "pdfjs-dist/build/pdf.worker.min";
 
 const API_BASE_URL = "https://pdfapi-si07.onrender.com";
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
@@ -18,7 +17,14 @@ export default function Home() {
   const canvasRef = useRef(null);
 
   const handleShowEditor = () => setShowEditor(true);
-  const handleBack = () => setShowEditor(false);
+  const handleBack = () => {
+    setShowEditor(false);
+    setOriginalText("");
+    setSearchText("");
+    setReplaceText("");
+    setUpdatedFile(null);
+    setFile(null);
+  };
 
   const handleFileChange = async (e) => {
     const selectedFile = e.target.files[0];
@@ -40,20 +46,28 @@ export default function Home() {
     }
   };
 
-  const renderPDFPreview = async (file) => {
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    const page = await pdf.getPage(1);
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
+  const renderPDFPreview = async (pdfFile) => {
+    const fileReader = new FileReader();
+    fileReader.onload = async function () {
+      const typedArray = new Uint8Array(this.result);
+      const pdf = await pdfjsLib.getDocument(typedArray).promise;
+      const page = await pdf.getPage(1);
 
-    const scale = 0.5;
-    const viewport = page.getViewport({ scale });
+      const canvas = canvasRef.current;
+      const context = canvas.getContext("2d");
+      const viewport = page.getViewport({ scale: 0.8 });
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
 
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
+      const renderContext = {
+        canvasContext: context,
+        viewport: viewport,
+      };
 
-    await page.render({ canvasContext: context, viewport }).promise;
+      await page.render(renderContext).promise;
+    };
+
+    fileReader.readAsArrayBuffer(pdfFile);
   };
 
   const handleUpload = async () => {
@@ -86,23 +100,27 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-6">
       <nav className="w-full flex items-center justify-between p-4 bg-gray-800 fixed top-0 left-0 z-10">
-        <button onClick={() => window.location.reload()} className="text-lg font-bold">PDF Editor</button>
+        <button onClick={() => window.location.reload()} className="text-lg font-bold">
+          PDF Editor
+        </button>
 
         <div className="hidden md:flex gap-4">
           <a href="#" className="hover:underline">Home</a>
           <a href="#" className="hover:underline">Upload</a>
-          <a href="#" className="hover:underline">History</a>
-          <a href="#" className="hover:underline">About</a>
+          <a href="#" className="hover:underline">Log In</a>
+          <a href="#" className="hover:underline">Register</a>
         </div>
 
         <div className="md:hidden">
-          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">☰</button>
+          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">
+            ☰
+          </button>
           {showMobileMenu && (
-            <div className="absolute right-4 top-16 bg-gray-800 w-40 rounded shadow-lg p-3 space-y-2">
+            <div className="md:hidden bg-gray-800 w-full text-center p-4 space-y-2">
               <a href="#" className="block hover:underline">Home</a>
               <a href="#" className="block hover:underline">Upload</a>
-              <a href="#" className="block hover:underline">History</a>
-              <a href="#" className="block hover:underline">About</a>
+              <a href="#" className="block hover:underline">Log In</a>
+              <a href="#" className="block hover:underline">Register</a>
             </div>
           )}
         </div>
@@ -122,8 +140,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="w-full max-w-xl space-y-4">
-            <h2 className="text-xl font-bold flex items-center gap-2">📄 PDF Text Editor</h2>
-
+            <h2 className="text-xl font-bold">📄 PDF Text Editor</h2>
             <input
               type="file"
               accept="application/pdf"
@@ -131,7 +148,10 @@ export default function Home() {
               className="w-full p-2 bg-gray-800 rounded"
             />
 
-            <canvas ref={canvasRef} className="mx-auto border rounded shadow bg-white" />
+            {/* Canvas Preview */}
+            <div className="flex justify-center">
+              <canvas ref={canvasRef} className="my-4 rounded shadow-md" style={{ width: "100%", maxWidth: "400px" }} />
+            </div>
 
             <input
               type="text"
