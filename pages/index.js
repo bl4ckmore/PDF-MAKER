@@ -54,7 +54,7 @@ export default function Home() {
     }
 
     if (user.role !== "premium" && editCount >= 2) {
-      alert("🚫 You reached daily free limit. Please upgrade to Premium to update unlimited PDF-s.");
+      alert("🚫 You reached daily free limit. Please upgrade to Premium.");
       return;
     }
 
@@ -146,31 +146,25 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col justify-between">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
       {/* Navbar */}
-      <nav className="w-full p-4 bg-gray-800 shadow-md flex items-center justify-between">
-        <Link href="/" className="text-lg font-bold">PDF Editor</Link>
-
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-x-4">
-          <Link href="/" className="text-sm text-blue-400 hover:underline">Home</Link>
-          <Link href="/dashboard" className="text-sm text-blue-400 hover:underline">Dashboard</Link>
+      <nav className="w-full p-4 bg-gray-800 shadow-lg flex items-center justify-between">
+        <Link href="/" className="text-xl font-bold text-white tracking-wide">PDF Editor</Link>
+        <div className="hidden md:flex items-center gap-x-6">
+          <Link href="/" className="text-sm hover:text-blue-400">Home</Link>
+          <Link href="/dashboard" className="text-sm hover:text-blue-400">Dashboard</Link>
           {!user?.role || user?.role !== "premium" ? (
             <Link href="/upgrade" className="text-sm text-yellow-400 hover:underline">Upgrade</Link>
           ) : null}
           {!user ? (
             <>
-              <Link href="/login" className="text-sm text-gray-300 hover:underline">Log In</Link>
-              <Link href="/register" className="text-sm text-gray-300 hover:underline">Register</Link>
+              <Link href="/login" className="text-sm hover:text-gray-300">Log In</Link>
+              <Link href="/register" className="text-sm hover:text-gray-300">Register</Link>
             </>
           ) : (
-            <button onClick={handleLogout} className="text-sm text-red-400 hover:underline">
-              Logout
-            </button>
+            <button onClick={handleLogout} className="text-sm text-red-400 hover:underline">Logout</button>
           )}
         </div>
-
-        {/* Mobile Menu Toggle */}
         <div className="md:hidden">
           <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">☰</button>
         </div>
@@ -179,15 +173,15 @@ export default function Home() {
       {/* Mobile Dropdown */}
       {showMobileMenu && (
         <div className="md:hidden bg-gray-800 text-center py-4 space-y-2">
-          <Link href="/" className="block text-sm text-blue-400 hover:underline">Home</Link>
-          <Link href="/dashboard" className="block text-sm text-blue-400 hover:underline">Dashboard</Link>
+          <Link href="/" className="block text-sm hover:text-blue-400">Home</Link>
+          <Link href="/dashboard" className="block text-sm hover:text-blue-400">Dashboard</Link>
           {!user?.role || user?.role !== "premium" ? (
             <Link href="/upgrade" className="block text-sm text-yellow-400 hover:underline">Upgrade</Link>
           ) : null}
           {!user ? (
             <>
-              <Link href="/login" className="block text-sm text-gray-300 hover:underline">Log In</Link>
-              <Link href="/register" className="block text-sm text-gray-300 hover:underline">Register</Link>
+              <Link href="/login" className="block text-sm hover:text-gray-300">Log In</Link>
+              <Link href="/register" className="block text-sm hover:text-gray-300">Register</Link>
             </>
           ) : (
             <button onClick={handleLogout} className="block text-sm text-red-400 hover:underline">Logout</button>
@@ -196,44 +190,45 @@ export default function Home() {
       )}
 
       {/* Main Content */}
-      <main className="pt-24 flex-grow flex justify-center px-4">
+      <main className="pt-24 flex-grow flex justify-center px-4 pb-10">
         {!showEditor ? (
-          <div className="text-center space-y-4">
-            <h1 className="text-3xl font-bold">Online PDF Editor</h1>
-            <p className="text-gray-400">Add text, annotate, fill and edit PDFs online</p>
-            <button onClick={handleShowEditor} className="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded text-white font-semibold">
-              Edit Now!
+          <div className="text-center space-y-6 max-w-lg">
+            <h1 className="text-4xl font-extrabold text-white">Edit PDFs Instantly</h1>
+            <p className="text-gray-300 text-lg">
+              Replace text, annotate, and edit your PDF files in seconds.
+            </p>
+            <button onClick={handleShowEditor} className="bg-blue-600 hover:bg-blue-700 transition px-8 py-3 rounded text-white font-semibold text-lg">
+              ✏️ Start Editing
             </button>
             {user && user.role !== "premium" && (
-              <p className="mt-2 text-yellow-400">
-                You are on a free plan. {editCount}/2 edits used.{" "}
-                <Link href="/upgrade" className="underline">Upgrade</Link> to unlock full access.
+              <p className="text-yellow-400 mt-4">
+                Free plan: {editCount}/2 edits used. <Link href="/upgrade" className="underline">Go Premium</Link>
               </p>
             )}
           </div>
         ) : (
-          <div className="w-full max-w-xl space-y-4">
-            <h2 className="text-xl font-bold">📄 PDF Text Editor</h2>
+          <div className="w-full max-w-2xl space-y-6 bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-semibold">📄 PDF Text Editor</h2>
 
-            <input type="file" accept="application/pdf" onChange={handleFileChange} className="w-full p-2 bg-gray-800 rounded" />
+            <input type="file" accept="application/pdf" onChange={handleFileChange} className="w-full p-2 bg-gray-700 rounded" />
 
             <div className="flex justify-center">
-              <canvas ref={canvasRef} className="my-4 rounded shadow-md border border-gray-600" style={{ width: "100%", maxWidth: "280px" }} />
+              <canvas ref={canvasRef} className="my-4 rounded shadow border border-gray-600" style={{ width: "100%", maxWidth: "320px" }} />
             </div>
 
-            <input type="text" placeholder="Text to find" value={searchText} onChange={(e) => setSearchText(e.target.value)} className="w-full p-2 bg-gray-800 rounded" />
-            <input type="text" placeholder="Replace with" value={replaceText} onChange={(e) => setReplaceText(e.target.value)} className="w-full p-2 bg-gray-800 rounded" />
+            <input type="text" placeholder="Text to find" value={searchText} onChange={(e) => setSearchText(e.target.value)} className="w-full p-2 bg-gray-700 rounded" />
+            <input type="text" placeholder="Replace with" value={replaceText} onChange={(e) => setReplaceText(e.target.value)} className="w-full p-2 bg-gray-700 rounded" />
 
             {originalText && (
-              <div className="mt-4 bg-gray-800 p-4 rounded text-sm max-h-64 overflow-auto">
-                <h3 className="font-semibold text-green-400 mb-1">Original Preview:</h3>
-                <p className="mb-2 whitespace-pre-wrap text-gray-300">{originalText}</p>
-                <h3 className="font-semibold text-yellow-400 mb-1 mt-2">Modified Preview:</h3>
-                <p className="whitespace-pre-wrap text-white">{getModifiedPreview()}</p>
+              <div className="bg-gray-700 p-4 rounded text-sm max-h-64 overflow-y-auto">
+                <h3 className="font-semibold text-green-400 mb-1">Original:</h3>
+                <p className="text-gray-300 whitespace-pre-wrap">{originalText}</p>
+                <h3 className="font-semibold text-yellow-400 mt-4 mb-1">Modified:</h3>
+                <p className="text-white whitespace-pre-wrap">{getModifiedPreview()}</p>
               </div>
             )}
 
-            <button onClick={handleUpload} disabled={loading} className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded text-white w-full">
+            <button onClick={handleUpload} disabled={loading} className="bg-green-600 hover:bg-green-700 transition px-6 py-2 rounded text-white w-full">
               {loading ? "Processing..." : "Replace Text"}
             </button>
 
@@ -243,16 +238,13 @@ export default function Home() {
               </a>
             )}
 
-            <button onClick={handleBack} className="block mt-2 text-sm text-gray-400 hover:underline">← Back to Home</button>
+            <button onClick={handleBack} className="text-sm text-gray-400 hover:underline">← Back to Home</button>
           </div>
         )}
       </main>
 
-      {/* Footer */}
       <footer className="text-center text-sm text-gray-500 py-4">
-        <Link href="/terms" className="text-gray-400 hover:underline">
-          Terms & Privacy
-        </Link>
+        <Link href="/terms" className="hover:underline">Terms & Privacy</Link>
       </footer>
     </div>
   );
