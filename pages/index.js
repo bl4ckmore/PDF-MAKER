@@ -16,11 +16,28 @@ export default function Home() {
   const [updatedFile, setUpdatedFile] = useState(null);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [user, setUser] = useState(null);
+  const [editCount, setEditCount] = useState(0);
   const canvasRef = useRef(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
     if (storedUser) setUser(JSON.parse(storedUser));
+
+    if (token) {
+      axios
+        .get(`${API_BASE_URL}/api/user/dashboard`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          setEditCount(res.data.history.length);
+        })
+        .catch(() => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setUser(null);
+        });
+    }
   }, []);
 
   const handleLogout = () => {
@@ -36,8 +53,8 @@ export default function Home() {
       return;
     }
 
-    if (user.role !== "premium") {
-      alert("🚫 This feature is only for Premium users.\nUpgrade to unlock editing!");
+    if (user.role !== "premium" && editCount >= 2) {
+      alert("🚫 Free users can only edit 2 PDFs. Upgrade to Premium to continue.");
       return;
     }
 
@@ -188,8 +205,7 @@ export default function Home() {
             </button>
             {user && user.role !== "premium" && (
               <p className="mt-2 text-yellow-400">
-                You're on a free plan.{" "}
-                <Link href="/upgrade" className="underline">Upgrade to Premium</Link> to unlock full features.
+                You are on a free plan. {editCount}/2 edits used. <Link href="/upgrade" className="underline">Upgrade</Link> to unlock full access.
               </p>
             )}
           </div>
