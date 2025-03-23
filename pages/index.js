@@ -54,7 +54,7 @@ export default function Home() {
     }
 
     if (user.role !== "premium" && editCount >= 2) {
-      alert("🚫 Free users can only edit 2 PDFs. Upgrade to Premium to continue.");
+      alert("🚫 You reached daily free limit. Please upgrade to Premium to update unlimited PDF-s.");
       return;
     }
 
