@@ -120,6 +120,12 @@ export default function Home() {
       return;
     }
 
+    // Check if searchText exists in the original PDF text
+    if (!originalText.toLowerCase().includes(searchText.toLowerCase())) {
+      alert(`❌ The word "${searchText}" was not found in the PDF.`);
+      return;
+    }
+
     const formData = new FormData();
     formData.append("pdf", file);
     formData.append("searchText", searchText);
@@ -142,7 +148,7 @@ export default function Home() {
 
   const getModifiedPreview = () => {
     return originalText
-      ? originalText.replace(new RegExp(searchText, "g"), replaceText)
+      ? originalText.replace(new RegExp(searchText, "gi"), replaceText)
       : "";
   };
 
@@ -152,7 +158,6 @@ export default function Home() {
       <nav className="w-full p-4 bg-gray-800 shadow-md flex items-center justify-between">
         <Link href="/" className="text-lg font-bold">PDF Editor</Link>
 
-        {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-x-4">
           <Link href="/" className="text-sm text-blue-400 hover:underline">Home</Link>
           {user && (
