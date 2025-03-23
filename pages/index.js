@@ -20,31 +20,30 @@ export default function Home() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
+    const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
-    if (!token) return;
+    if (storedUser) setUser(JSON.parse(storedUser));
 
-    axios
-      .get(`${API_BASE_URL}/api/user/dashboard`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        const userData = res.data.user;
-        setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
-        setEditCount(res.data.history.length);
-      })
-      .catch(() => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        setUser(null);
-        setEditCount(0);
-      });
+    if (token) {
+      axios
+        .get(`${API_BASE_URL}/api/user/dashboard`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          setEditCount(res.data.history.length);
+        })
+        .catch(() => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setUser(null);
+        });
+    }
   }, []);
 
   const handleLogout = () => {
-    localStorage.clear();
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
     setUser(null);
-    setEditCount(0);
     window.location.reload();
   };
 
@@ -55,7 +54,7 @@ export default function Home() {
     }
 
     if (user.role !== "premium" && editCount >= 2) {
-      alert("🚫 You reached the free limit. Please upgrade to Premium.");
+      alert("🚫 You reached daily free limit. Please upgrade to Premium to update unlimited PDF-s.");
       return;
     }
 
@@ -98,13 +97,16 @@ export default function Home() {
         const typedArray = new Uint8Array(this.result);
         const pdf = await pdfjsLib.getDocument(typedArray).promise;
         const page = await pdf.getPage(1);
+
         const canvas = canvasRef.current;
         const context = canvas.getContext("2d");
         const viewport = page.getViewport({ scale: 0.6 });
         canvas.height = viewport.height;
         canvas.width = viewport.width;
+
         await page.render({ canvasContext: context, viewport }).promise;
       };
+
       fileReader.readAsArrayBuffer(pdfFile);
     } catch (error) {
       console.error("PDF Preview Error:", error);
@@ -129,7 +131,6 @@ export default function Home() {
 
       const res = await axios.post(`${API_BASE_URL}/api/pdf/replace-text`, formData, { headers });
       setUpdatedFile(`${API_BASE_URL}/pdf/${res.data.filename}`);
-      setEditCount((prev) => prev + 1); // Increase locally
     } catch (err) {
       console.error("Upload Error:", err);
       alert("❌ Failed to process PDF");
@@ -139,13 +140,18 @@ export default function Home() {
   };
 
   const getModifiedPreview = () => {
-    return originalText ? originalText.replace(new RegExp(searchText, "g"), replaceText) : "";
+    return originalText
+      ? originalText.replace(new RegExp(searchText, "g"), replaceText)
+      : "";
   };
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-6">
       <nav className="w-full flex items-center justify-between p-4 bg-gray-800 fixed top-0 left-0 z-10">
-        <button onClick={() => (window.location.href = "/")} className="text-lg font-bold">PDF Editor</button>
+        <button onClick={() => (window.location.href = "/")} className="text-lg font-bold">
+          PDF Editor
+        </button>
+
         <div className="hidden md:flex gap-4">
           <a href="#" className="hover:underline">Home</a>
           <a href="#" className="hover:underline">Upload</a>
@@ -163,7 +169,9 @@ export default function Home() {
         </div>
 
         <div className="md:hidden">
-          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">☰</button>
+          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">
+            ☰
+          </button>
           {showMobileMenu && (
             <div className="bg-gray-800 w-full text-center p-4 space-y-2">
               <a href="#" className="block hover:underline">Home</a>
@@ -197,20 +205,45 @@ export default function Home() {
             </button>
             {user && user.role !== "premium" && (
               <p className="mt-2 text-yellow-400">
-                Free plan: {editCount}/2 used.{" "}
-                <Link href="/upgrade" className="underline">Upgrade</Link> for unlimited access.
+                You are on a free plan. {editCount}/2 edits used. <Link href="/upgrade" className="underline">Upgrade</Link> to unlock full access.
               </p>
             )}
           </div>
         ) : (
           <div className="w-full max-w-xl space-y-4">
             <h2 className="text-xl font-bold">📄 PDF Text Editor</h2>
-            <input type="file" accept="application/pdf" onChange={handleFileChange} className="w-full p-2 bg-gray-800 rounded" />
+
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={handleFileChange}
+              className="w-full p-2 bg-gray-800 rounded"
+            />
+
             <div className="flex justify-center">
-              <canvas ref={canvasRef} className="my-4 rounded shadow-md border border-gray-600" style={{ width: "100%", maxWidth: "280px" }} />
+              <canvas
+                ref={canvasRef}
+                className="my-4 rounded shadow-md border border-gray-600"
+                style={{ width: "100%", maxWidth: "280px" }}
+              />
             </div>
-            <input type="text" placeholder="Text to find" value={searchText} onChange={(e) => setSearchText(e.target.value)} className="w-full p-2 bg-gray-800 rounded" />
-            <input type="text" placeholder="Replace with" value={replaceText} onChange={(e) => setReplaceText(e.target.value)} className="w-full p-2 bg-gray-800 rounded" />
+
+            <input
+              type="text"
+              placeholder="Text to find"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="w-full p-2 bg-gray-800 rounded"
+            />
+
+            <input
+              type="text"
+              placeholder="Replace with"
+              value={replaceText}
+              onChange={(e) => setReplaceText(e.target.value)}
+              className="w-full p-2 bg-gray-800 rounded"
+            />
+
             {originalText && (
               <div className="mt-4 bg-gray-800 p-4 rounded text-sm max-h-64 overflow-auto">
                 <h3 className="font-semibold text-green-400 mb-1">Original Preview:</h3>
@@ -219,15 +252,29 @@ export default function Home() {
                 <p className="whitespace-pre-wrap text-white">{getModifiedPreview()}</p>
               </div>
             )}
-            <button onClick={handleUpload} disabled={loading} className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded text-white w-full">
+
+            <button
+              onClick={handleUpload}
+              disabled={loading}
+              className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded text-white w-full"
+            >
               {loading ? "Processing..." : "Replace Text"}
             </button>
+
             {updatedFile && (
-              <a href={updatedFile} download className="block mt-4 text-center bg-blue-700 hover:bg-blue-800 px-6 py-2 rounded">
+              <a
+                href={updatedFile}
+                download
+                className="block mt-4 text-center bg-blue-700 hover:bg-blue-800 px-6 py-2 rounded"
+              >
                 Download Updated PDF
               </a>
             )}
-            <button onClick={handleBack} className="block mt-2 text-sm text-gray-400 hover:underline">
+
+            <button
+              onClick={handleBack}
+              className="block mt-2 text-sm text-gray-400 hover:underline"
+            >
               ← Back to Home
             </button>
           </div>
