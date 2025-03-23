@@ -146,11 +146,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col justify-between">
+      {/* Nav */}
       <nav className="w-full flex items-center justify-between p-4 bg-gray-800 fixed top-0 left-0 z-10">
-        <button onClick={() => (window.location.href = "/")} className="text-lg font-bold">
-          PDF Editor
-        </button>
+        <button onClick={() => (window.location.href = "/")} className="text-lg font-bold">PDF Editor</button>
 
         <div className="hidden md:flex gap-4">
           <a href="#" className="hover:underline">Home</a>
@@ -169,9 +168,7 @@ export default function Home() {
         </div>
 
         <div className="md:hidden">
-          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">
-            ☰
-          </button>
+          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">☰</button>
           {showMobileMenu && (
             <div className="bg-gray-800 w-full text-center p-4 space-y-2">
               <a href="#" className="block hover:underline">Home</a>
@@ -192,17 +189,13 @@ export default function Home() {
         </div>
       </nav>
 
-      <div className="pt-24 w-full flex justify-center">
+      {/* Main Content */}
+      <main className="pt-24 flex-grow flex justify-center">
         {!showEditor ? (
           <div className="text-center space-y-4">
             <h1 className="text-3xl font-bold">Online PDF Editor</h1>
             <p className="text-gray-400">Add text, annotate, fill and edit PDFs online</p>
-            <button
-              onClick={handleShowEditor}
-              className="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded text-white font-semibold"
-            >
-              Edit Now!
-            </button>
+            <button onClick={handleShowEditor} className="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded text-white font-semibold">Edit Now!</button>
             {user && user.role !== "premium" && (
               <p className="mt-2 text-yellow-400">
                 You are on a free plan. {editCount}/2 edits used. <Link href="/upgrade" className="underline">Upgrade</Link> to unlock full access.
@@ -213,36 +206,14 @@ export default function Home() {
           <div className="w-full max-w-xl space-y-4">
             <h2 className="text-xl font-bold">📄 PDF Text Editor</h2>
 
-            <input
-              type="file"
-              accept="application/pdf"
-              onChange={handleFileChange}
-              className="w-full p-2 bg-gray-800 rounded"
-            />
+            <input type="file" accept="application/pdf" onChange={handleFileChange} className="w-full p-2 bg-gray-800 rounded" />
 
             <div className="flex justify-center">
-              <canvas
-                ref={canvasRef}
-                className="my-4 rounded shadow-md border border-gray-600"
-                style={{ width: "100%", maxWidth: "280px" }}
-              />
+              <canvas ref={canvasRef} className="my-4 rounded shadow-md border border-gray-600" style={{ width: "100%", maxWidth: "280px" }} />
             </div>
 
-            <input
-              type="text"
-              placeholder="Text to find"
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="w-full p-2 bg-gray-800 rounded"
-            />
-
-            <input
-              type="text"
-              placeholder="Replace with"
-              value={replaceText}
-              onChange={(e) => setReplaceText(e.target.value)}
-              className="w-full p-2 bg-gray-800 rounded"
-            />
+            <input type="text" placeholder="Text to find" value={searchText} onChange={(e) => setSearchText(e.target.value)} className="w-full p-2 bg-gray-800 rounded" />
+            <input type="text" placeholder="Replace with" value={replaceText} onChange={(e) => setReplaceText(e.target.value)} className="w-full p-2 bg-gray-800 rounded" />
 
             {originalText && (
               <div className="mt-4 bg-gray-800 p-4 rounded text-sm max-h-64 overflow-auto">
@@ -253,33 +224,27 @@ export default function Home() {
               </div>
             )}
 
-            <button
-              onClick={handleUpload}
-              disabled={loading}
-              className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded text-white w-full"
-            >
+            <button onClick={handleUpload} disabled={loading} className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded text-white w-full">
               {loading ? "Processing..." : "Replace Text"}
             </button>
 
             {updatedFile && (
-              <a
-                href={updatedFile}
-                download
-                className="block mt-4 text-center bg-blue-700 hover:bg-blue-800 px-6 py-2 rounded"
-              >
+              <a href={updatedFile} download className="block mt-4 text-center bg-blue-700 hover:bg-blue-800 px-6 py-2 rounded">
                 Download Updated PDF
               </a>
             )}
 
-            <button
-              onClick={handleBack}
-              className="block mt-2 text-sm text-gray-400 hover:underline"
-            >
-              ← Back to Home
-            </button>
+            <button onClick={handleBack} className="block mt-2 text-sm text-gray-400 hover:underline">← Back to Home</button>
           </div>
         )}
-      </div>
+      </main>
+
+      {/* ✅ Footer with Terms */}
+      <footer className="text-center text-sm text-gray-500 py-4">
+        <Link href="/terms" className="text-gray-400 hover:underline">
+          Terms & Privacy
+        </Link>
+      </footer>
     </div>
   );
 }
