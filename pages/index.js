@@ -155,10 +155,14 @@ export default function Home() {
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-x-4">
           <Link href="/" className="text-sm text-blue-400 hover:underline">Home</Link>
-          <Link href="/dashboard" className="text-sm text-blue-400 hover:underline">Dashboard</Link>
-          {!user?.role || user?.role !== "premium" ? (
-            <Link href="/upgrade" className="text-sm text-yellow-400 hover:underline">Upgrade</Link>
-          ) : null}
+          {user && (
+            <>
+              <Link href="/dashboard" className="text-sm text-blue-400 hover:underline">Dashboard</Link>
+              {user?.role !== "premium" && (
+                <Link href="/upgrade" className="text-sm text-yellow-400 hover:underline">Upgrade</Link>
+              )}
+            </>
+          )}
           {!user ? (
             <>
               <Link href="/login" className="text-sm text-gray-300 hover:underline">Log In</Link>
@@ -181,10 +185,14 @@ export default function Home() {
       {showMobileMenu && (
         <div className="md:hidden bg-gray-800 text-center py-4 space-y-2">
           <Link href="/" className="block text-sm text-blue-400 hover:underline">Home</Link>
-          <Link href="/dashboard" className="block text-sm text-blue-400 hover:underline">Dashboard</Link>
-          {!user?.role || user?.role !== "premium" ? (
-            <Link href="/upgrade" className="block text-sm text-yellow-400 hover:underline">Upgrade</Link>
-          ) : null}
+          {user && (
+            <>
+              <Link href="/dashboard" className="block text-sm text-blue-400 hover:underline">Dashboard</Link>
+              {user?.role !== "premium" && (
+                <Link href="/upgrade" className="block text-sm text-yellow-400 hover:underline">Upgrade</Link>
+              )}
+            </>
+          )}
           {!user ? (
             <>
               <Link href="/login" className="block text-sm text-gray-300 hover:underline">Log In</Link>
