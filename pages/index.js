@@ -1,4 +1,3 @@
-// pages/index.js
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import * as pdfjsLib from "pdfjs-dist";
@@ -19,6 +18,7 @@ export default function Home() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [user, setUser] = useState(null);
   const [editCount, setEditCount] = useState(0);
+  const [notFound, setNotFound] = useState(false);
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -70,6 +70,7 @@ export default function Home() {
     setReplaceText("");
     setUpdatedFile(null);
     setFile(null);
+    setNotFound(false);
   };
 
   const handleFileChange = async (e) => {
@@ -78,6 +79,7 @@ export default function Home() {
 
     setFile(selectedFile);
     setOriginalText("");
+    setNotFound(false);
 
     const formData = new FormData();
     formData.append("pdf", selectedFile);
@@ -87,7 +89,6 @@ export default function Home() {
       setOriginalText(res.data.text);
       renderPDFPreview(selectedFile);
     } catch (err) {
-      console.error("Error extracting text:", err);
       alert("❌ Failed to preview PDF content");
     }
   };
@@ -122,8 +123,10 @@ export default function Home() {
     }
 
     if (!originalText.includes(searchText)) {
-      alert("🔍 Search text not found in the PDF.");
+      setNotFound(true);
       return;
+    } else {
+      setNotFound(false);
     }
 
     const formData = new FormData();
@@ -139,7 +142,6 @@ export default function Home() {
       const res = await axios.post(`${API_BASE_URL}/api/pdf/replace-text`, formData, { headers });
       setUpdatedFile(`${API_BASE_URL}/pdf/${res.data.filename}`);
     } catch (err) {
-      console.error("Upload Error:", err);
       alert("❌ Failed to process PDF");
     } finally {
       setLoading(false);
@@ -153,125 +155,144 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-pink-600 via-purple-700 to-cyan-600 text-white">
-      {/* NAVBAR */}
-      <nav className="bg-black bg-opacity-70 w-full px-4 py-3 flex justify-between items-center fixed top-0 left-0 z-50">
+    <div className="min-h-screen bg-cover bg-center bg-no-repeat text-white flex flex-col justify-between"
+      style={{ backgroundImage: "url('/bg-wallpaper.jpg')" }}
+    >
+      {/* Navbar */}
+      <nav className="w-full p-4 bg-black bg-opacity-60 shadow-md flex items-center justify-between fixed z-50">
         <Link href="/" className="text-lg font-bold">PDF Editor</Link>
 
-        <div className="hidden md:flex gap-4 items-center text-sm">
-          <Link href="/" className="text-blue-400 hover:underline">Home</Link>
+        {/* Desktop Menu */}
+        <div className="hidden md:flex items-center gap-x-4">
+          <Link href="/" className="text-sm text-blue-400 hover:underline">Home</Link>
           {user && (
             <>
-              <Link href="/dashboard" className="text-blue-400 hover:underline">Dashboard</Link>
-              {user.role !== "premium" && (
-                <Link href="/upgrade" className="text-yellow-400 hover:underline">Upgrade</Link>
+              <Link href="/dashboard" className="text-sm text-blue-400 hover:underline">Dashboard</Link>
+              {user?.role !== "premium" && (
+                <Link href="/upgrade" className="text-sm text-yellow-400 hover:underline">Upgrade</Link>
               )}
             </>
           )}
           {!user ? (
             <>
-              <Link href="/login" className="text-gray-300 hover:underline">Login</Link>
-              <Link href="/register" className="text-gray-300 hover:underline">Register</Link>
+              <Link href="/login" className="text-sm text-gray-300 hover:underline">Log In</Link>
+              <Link href="/register" className="text-sm text-gray-300 hover:underline">Register</Link>
             </>
           ) : (
-            <button onClick={handleLogout} className="text-red-400 hover:underline">Logout</button>
+            <button onClick={handleLogout} className="text-sm text-red-400 hover:underline">Logout</button>
           )}
         </div>
 
-        {/* Mobile Burger */}
-        <div className="md:hidden text-white text-2xl">
-          <button onClick={() => setShowMobileMenu(!showMobileMenu)}>☰</button>
+        {/* Mobile */}
+        <div className="md:hidden">
+          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">☰</button>
         </div>
       </nav>
 
-      {/* MOBILE MENU */}
+      {/* Mobile Dropdown */}
       {showMobileMenu && (
-        <div className="md:hidden bg-black bg-opacity-80 text-center py-4 space-y-2 mt-12 z-40">
-          <Link href="/" className="block text-blue-400 hover:underline">Home</Link>
+        <div className="md:hidden bg-black bg-opacity-80 text-center py-4 space-y-2 mt-16 z-50">
+          <Link href="/" className="block text-sm text-blue-400 hover:underline">Home</Link>
           {user && (
             <>
-              <Link href="/dashboard" className="block text-blue-400 hover:underline">Dashboard</Link>
-              {user.role !== "premium" && (
-                <Link href="/upgrade" className="block text-yellow-400 hover:underline">Upgrade</Link>
+              <Link href="/dashboard" className="block text-sm text-blue-400 hover:underline">Dashboard</Link>
+              {user?.role !== "premium" && (
+                <Link href="/upgrade" className="block text-sm text-yellow-400 hover:underline">Upgrade</Link>
               )}
             </>
           )}
           {!user ? (
             <>
-              <Link href="/login" className="block text-gray-300 hover:underline">Login</Link>
-              <Link href="/register" className="block text-gray-300 hover:underline">Register</Link>
+              <Link href="/login" className="block text-sm text-gray-300 hover:underline">Log In</Link>
+              <Link href="/register" className="block text-sm text-gray-300 hover:underline">Register</Link>
             </>
           ) : (
-            <button onClick={handleLogout} className="block text-red-400 hover:underline">Logout</button>
+            <button onClick={handleLogout} className="block text-sm text-red-400 hover:underline">Logout</button>
           )}
         </div>
       )}
 
-      {/* MAIN CONTENT */}
-      <main className="flex-grow flex items-center justify-center px-4 pt-32 pb-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="bg-black bg-opacity-70 p-8 rounded-xl shadow-xl w-full max-w-xl text-center backdrop-blur-md"
-        >
-          {!showEditor ? (
-            <>
-              <h1 className="text-3xl font-bold mb-2">Edit Your PDF in Seconds</h1>
-              <p className="text-gray-300 mb-6">No downloads. No hassle. Just upload and go!</p>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleShowEditor}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded font-semibold"
-              >
-                Start Editing
-              </motion.button>
-            </>
-          ) : (
-            <>
-              <h2 className="text-xl font-semibold mb-4">📄 PDF Text Editor</h2>
+      {/* Main Content */}
+      <main className="pt-32 pb-10 flex-grow flex justify-center px-4 backdrop-blur-md">
+        {!showEditor ? (
+          <motion.div className="text-center space-y-4 bg-black bg-opacity-30 p-8 rounded-xl shadow-lg"
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-4xl font-bold tracking-tight">Edit Your PDF in Seconds</h1>
+            <p className="text-gray-300 text-lg">No downloads. No hassle. Just upload and go!</p>
+            <motion.button
+              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+              onClick={handleShowEditor}
+              className="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded text-white font-semibold shadow-md transition-all"
+            >
+              Start Editing
+            </motion.button>
+            {user && user.role !== "premium" && (
+              <p className="mt-2 text-yellow-300 text-sm">
+                You are on a free plan. {editCount}/2 edits used.{" "}
+                <Link href="/upgrade" className="underline">Upgrade</Link>
+              </p>
+            )}
+          </motion.div>
+        ) : (
+          <motion.div className="w-full max-w-xl space-y-4 bg-black bg-opacity-30 p-6 rounded-lg shadow-lg"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-xl font-bold">📄 PDF Text Editor</h2>
 
-              <input type="file" accept="application/pdf" onChange={handleFileChange} className="w-full p-2 bg-gray-800 rounded mb-2" />
-              <canvas ref={canvasRef} className="my-2 rounded shadow border border-gray-600 mx-auto" style={{ width: "100%", maxWidth: "280px" }} />
+            <input type="file" accept="application/pdf" onChange={handleFileChange} className="w-full p-2 bg-gray-800 rounded" />
 
-              <input type="text" placeholder="Text to find" value={searchText} onChange={(e) => setSearchText(e.target.value)} className="w-full p-2 bg-gray-800 rounded mb-2" />
-              <input type="text" placeholder="Replace with" value={replaceText} onChange={(e) => setReplaceText(e.target.value)} className="w-full p-2 bg-gray-800 rounded mb-2" />
+            <div className="flex justify-center">
+              <canvas ref={canvasRef} className="my-4 rounded shadow-md border border-gray-600" style={{ width: "100%", maxWidth: "280px" }} />
+            </div>
 
-              {originalText && (
-                <div className="bg-gray-800 rounded p-4 max-h-48 overflow-auto text-left text-sm">
-                  <p className="text-green-400 font-bold mb-1">Original:</p>
-                  <p className="text-gray-300 whitespace-pre-wrap mb-2">{originalText}</p>
-                  <p className="text-yellow-400 font-bold mb-1">Modified:</p>
-                  <p className="text-white whitespace-pre-wrap">{getModifiedPreview()}</p>
-                </div>
+            <input type="text" placeholder="Text to find" value={searchText} onChange={(e) => setSearchText(e.target.value)} className="w-full p-2 bg-gray-800 rounded" />
+            <input type="text" placeholder="Replace with" value={replaceText} onChange={(e) => setReplaceText(e.target.value)} className="w-full p-2 bg-gray-800 rounded" />
+
+            {notFound && (
+              <p className="text-red-400 text-sm">❌ The word "{searchText}" was not found in the document.</p>
+            )}
+
+            {originalText && (
+              <div className="mt-4 bg-gray-800 p-4 rounded text-sm max-h-64 overflow-auto">
+                <h3 className="font-semibold text-green-400 mb-1">Original Preview:</h3>
+                <p className="mb-2 whitespace-pre-wrap text-gray-300">{originalText}</p>
+                <h3 className="font-semibold text-yellow-400 mb-1 mt-2">Modified Preview:</h3>
+                <p className="whitespace-pre-wrap text-white">{getModifiedPreview()}</p>
+              </div>
+            )}
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={handleUpload}
+              disabled={loading}
+              className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded text-white w-full transition-all"
+            >
+              {loading ? (
+                <span className="flex justify-center items-center">
+                  <span className="animate-spin rounded-full h-5 w-5 border-t-2 border-white border-opacity-50 mr-2"></span>
+                  Processing...
+                </span>
+              ) : (
+                "Replace Text"
               )}
+            </motion.button>
 
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.96 }}
-                onClick={handleUpload}
-                disabled={loading}
-                className="mt-4 bg-green-600 hover:bg-green-700 w-full py-2 rounded"
-              >
-                {loading ? "Processing..." : "Replace Text"}
-              </motion.button>
+            {updatedFile && (
+              <a href={updatedFile} download className="block mt-4 text-center bg-blue-700 hover:bg-blue-800 px-6 py-2 rounded">
+                Download Updated PDF
+              </a>
+            )}
 
-              {updatedFile && (
-                <a href={updatedFile} download className="block mt-4 bg-blue-700 hover:bg-blue-800 py-2 rounded">
-                  Download Updated PDF
-                </a>
-              )}
-
-              <button onClick={handleBack} className="mt-3 text-sm text-gray-400 hover:underline">← Back</button>
-            </>
-          )}
-        </motion.div>
+            <button onClick={handleBack} className="block mt-2 text-sm text-gray-400 hover:underline">← Back to Home</button>
+          </motion.div>
+        )}
       </main>
 
-      {/* FOOTER */}
-      <footer className="bg-black bg-opacity-70 text-center py-4 text-sm text-gray-400">
-        <Link href="/terms" className="hover:underline">Terms & Privacy</Link>
+      {/* Footer */}
+      <footer className="text-center text-sm text-gray-300 py-6 bg-black bg-opacity-50">
+        <Link href="/terms" className="hover:underline text-gray-400">Terms & Privacy</Link>
       </footer>
     </div>
   );
