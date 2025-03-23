@@ -31,14 +31,19 @@ export default function Home() {
   };
 
   const handleShowEditor = () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("🚫 Please log in to edit PDFs");
-      window.location.href = "/login";
+    if (!user) {
+      alert("🔐 Please log in to use the PDF Editor.");
       return;
     }
+
+    if (user.role !== "premium") {
+      alert("🚫 This feature is only for Premium users.\nUpgrade to unlock editing!");
+      return;
+    }
+
     setShowEditor(true);
   };
+
   const handleBack = () => {
     setShowEditor(false);
     setOriginalText("");
@@ -107,10 +112,7 @@ export default function Home() {
       const token = localStorage.getItem("token");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      const res = await axios.post(`${API_BASE_URL}/api/pdf/replace-text`, formData, {
-        headers,
-      });
-
+      const res = await axios.post(`${API_BASE_URL}/api/pdf/replace-text`, formData, { headers });
       setUpdatedFile(`${API_BASE_URL}/pdf/${res.data.filename}`);
     } catch (err) {
       console.error("Upload Error:", err);
@@ -121,17 +123,18 @@ export default function Home() {
   };
 
   const getModifiedPreview = () => {
-    return originalText ? originalText.replace(new RegExp(searchText, "g"), replaceText) : "";
+    return originalText
+      ? originalText.replace(new RegExp(searchText, "g"), replaceText)
+      : "";
   };
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-6">
       <nav className="w-full flex items-center justify-between p-4 bg-gray-800 fixed top-0 left-0 z-10">
-        <button onClick={() => window.location.href = '/'} className="text-lg font-bold">
+        <button onClick={() => (window.location.href = "/")} className="text-lg font-bold">
           PDF Editor
         </button>
 
-        {/* Desktop Nav */}
         <div className="hidden md:flex gap-4">
           <a href="#" className="hover:underline">Home</a>
           <a href="#" className="hover:underline">Upload</a>
@@ -148,9 +151,10 @@ export default function Home() {
           )}
         </div>
 
-        {/* Mobile Nav */}
         <div className="md:hidden">
-          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">☰</button>
+          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">
+            ☰
+          </button>
           {showMobileMenu && (
             <div className="bg-gray-800 w-full text-center p-4 space-y-2">
               <a href="#" className="block hover:underline">Home</a>
@@ -171,7 +175,6 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Main UI */}
       <div className="pt-24 w-full flex justify-center">
         {!showEditor ? (
           <div className="text-center space-y-4">
@@ -183,6 +186,12 @@ export default function Home() {
             >
               Edit Now!
             </button>
+            {user && user.role !== "premium" && (
+              <p className="mt-2 text-yellow-400">
+                You're on a free plan.{" "}
+                <Link href="/upgrade" className="underline">Upgrade to Premium</Link> to unlock full features.
+              </p>
+            )}
           </div>
         ) : (
           <div className="w-full max-w-xl space-y-4">
@@ -195,7 +204,6 @@ export default function Home() {
               className="w-full p-2 bg-gray-800 rounded"
             />
 
-            {/* Canvas */}
             <div className="flex justify-center">
               <canvas
                 ref={canvasRef}
