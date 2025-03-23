@@ -27,7 +27,7 @@ export default function Login() {
       if (res.data.success) {
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("user", JSON.stringify(res.data.user));
-        router.push("/"); // Go to home after login
+        router.push("/");
       }
     } catch (err) {
       console.error(err);
@@ -38,7 +38,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-6 animate-fadeIn">
       <form
         onSubmit={handleSubmit}
         className="bg-gray-800 p-6 rounded w-full max-w-md space-y-4 shadow-md"
@@ -70,7 +70,7 @@ export default function Login() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
+          className="w-full bg-blue-600 hover:bg-blue-700 transition duration-200 text-white py-2 rounded"
         >
           {loading ? "Logging in..." : "Log In"}
         </button>
