@@ -148,9 +148,10 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col justify-between">
       {/* Navbar */}
-      <nav className="w-full flex items-center justify-between p-4 bg-gray-800 shadow-md">
+      <nav className="w-full p-4 bg-gray-800 shadow-md flex items-center justify-between">
         <Link href="/" className="text-lg font-bold">PDF Editor</Link>
 
+        {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-x-4">
           <Link href="/" className="text-sm text-blue-400 hover:underline">Home</Link>
           <Link href="/dashboard" className="text-sm text-blue-400 hover:underline">Dashboard</Link>
@@ -169,9 +170,30 @@ export default function Home() {
           )}
         </div>
 
-        {/* Mobile */}
-        <div className="md:hidden text-white text-2xl">☰</div>
+        {/* Mobile Menu Toggle */}
+        <div className="md:hidden">
+          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">☰</button>
+        </div>
       </nav>
+
+      {/* Mobile Dropdown */}
+      {showMobileMenu && (
+        <div className="md:hidden bg-gray-800 text-center py-4 space-y-2">
+          <Link href="/" className="block text-sm text-blue-400 hover:underline">Home</Link>
+          <Link href="/dashboard" className="block text-sm text-blue-400 hover:underline">Dashboard</Link>
+          {!user?.role || user?.role !== "premium" ? (
+            <Link href="/upgrade" className="block text-sm text-yellow-400 hover:underline">Upgrade</Link>
+          ) : null}
+          {!user ? (
+            <>
+              <Link href="/login" className="block text-sm text-gray-300 hover:underline">Log In</Link>
+              <Link href="/register" className="block text-sm text-gray-300 hover:underline">Register</Link>
+            </>
+          ) : (
+            <button onClick={handleLogout} className="block text-sm text-red-400 hover:underline">Logout</button>
+          )}
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="pt-24 flex-grow flex justify-center px-4">
