@@ -148,57 +148,43 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col justify-between">
       {/* Nav */}
-      <nav className="w-full flex items-center justify-between p-4 bg-gray-800 fixed top-0 left-0 z-10">
-        <button onClick={() => (window.location.href = "/")} className="text-lg font-bold">PDF Editor</button>
+      <nav className="w-full flex items-center justify-between p-4 bg-gray-800 shadow-md">
+        <Link href="/" className="text-lg font-bold">PDF Editor</Link>
 
-        <div className="hidden md:flex gap-4">
-          <a href="#" className="hover:underline">Home</a>
-          <a href="#" className="hover:underline">Upload</a>
+        {/* Desktop Links */}
+        <div className="hidden md:flex items-center gap-4">
+          <Link href="/" className="text-sm text-blue-400 hover:underline">Home</Link>
+          <Link href="/dashboard" className="text-sm text-blue-400 hover:underline">Dashboard</Link>
+          <Link href="/upgrade" className="text-sm text-yellow-400 hover:underline">Upgrade</Link>
           {!user ? (
             <>
-              <Link href="/login" className="hover:underline">Log In</Link>
-              <Link href="/register" className="hover:underline">Register</Link>
+              <Link href="/login" className="text-sm text-gray-300 hover:underline">Log In</Link>
+              <Link href="/register" className="text-sm text-gray-300 hover:underline">Register</Link>
             </>
           ) : (
-            <>
-              <Link href="/dashboard" className="hover:underline">Dashboard</Link>
-              <button onClick={handleLogout} className="hover:underline text-red-400">Logout</button>
-            </>
+            <button onClick={handleLogout} className="text-sm text-red-400 hover:underline">
+              Logout
+            </button>
           )}
         </div>
 
-        <div className="md:hidden">
-          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">☰</button>
-          {showMobileMenu && (
-            <div className="bg-gray-800 w-full text-center p-4 space-y-2">
-              <a href="#" className="block hover:underline">Home</a>
-              <a href="#" className="block hover:underline">Upload</a>
-              {!user ? (
-                <>
-                  <Link href="/login" className="block hover:underline">Log In</Link>
-                  <Link href="/register" className="block hover:underline">Register</Link>
-                </>
-              ) : (
-                <>
-                  <Link href="/dashboard" className="block hover:underline">Dashboard</Link>
-                  <button onClick={handleLogout} className="block text-red-400 hover:underline">Logout</button>
-                </>
-              )}
-            </div>
-          )}
-        </div>
+        {/* Mobile burger (can enhance later to toggle menu) */}
+        <div className="md:hidden text-white text-2xl">☰</div>
       </nav>
 
       {/* Main Content */}
-      <main className="pt-24 flex-grow flex justify-center">
+      <main className="pt-24 flex-grow flex justify-center px-4">
         {!showEditor ? (
           <div className="text-center space-y-4">
             <h1 className="text-3xl font-bold">Online PDF Editor</h1>
             <p className="text-gray-400">Add text, annotate, fill and edit PDFs online</p>
-            <button onClick={handleShowEditor} className="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded text-white font-semibold">Edit Now!</button>
+            <button onClick={handleShowEditor} className="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded text-white font-semibold">
+              Edit Now!
+            </button>
             {user && user.role !== "premium" && (
               <p className="mt-2 text-yellow-400">
-                You are on a free plan. {editCount}/2 edits used. <Link href="/upgrade" className="underline">Upgrade</Link> to unlock full access.
+                You are on a free plan. {editCount}/2 edits used.{" "}
+                <Link href="/upgrade" className="underline">Upgrade</Link> to unlock full access.
               </p>
             )}
           </div>
@@ -239,7 +225,7 @@ export default function Home() {
         )}
       </main>
 
-      {/* ✅ Footer with Terms */}
+      {/* Footer */}
       <footer className="text-center text-sm text-gray-500 py-4">
         <Link href="/terms" className="text-gray-400 hover:underline">
           Terms & Privacy
