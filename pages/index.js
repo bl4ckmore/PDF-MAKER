@@ -169,7 +169,7 @@ export default function Home() {
         </div>
 
         {/* Mobile burger (can enhance later to toggle menu) */}
-        <div className="md:hidden text-white text-2xl">☰</div>
+        <div className="md:hidden text-white text-2xl gap-4">☰</div>
       </nav>
 
       {/* Main Content */}
