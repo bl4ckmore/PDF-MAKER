@@ -39,8 +39,7 @@ export default function Dashboard() {
       });
   }, [router]);
 
-  if (loading)
-    return <p className="text-white p-6 animate-pulse">Loading dashboard...</p>;
+  if (loading) return null; // 👈 Hide page until data is loaded
 
   return (
     <div className="min-h-screen bg-gray-900 text-white px-4 py-6 animate-fadeIn">
@@ -48,16 +47,16 @@ export default function Dashboard() {
       <nav className="w-full flex items-center justify-between p-4 bg-gray-800 rounded mb-6 shadow-lg">
         <button
           onClick={() => router.push("/")}
-          className="text-lg font-bold text-white hover:text-blue-300 transition duration-200"
+          className="text-lg font-bold text-white hover:text-blue-300 transition"
         >
           PDF Editor
         </button>
 
         <div className="hidden md:flex gap-4 items-center">
-          <Link href="/" className="transition text-sm text-blue-400 hover:underline">Home</Link>
-          <Link href="/dashboard" className="transition text-sm text-blue-400 hover:underline">Dashboard</Link>
+          <Link href="/" className="text-sm text-blue-400 hover:underline transition">Home</Link>
+          <Link href="/dashboard" className="text-sm text-blue-400 hover:underline transition">Dashboard</Link>
           {user?.role !== "premium" && (
-            <Link href="/upgrade" className="transition text-sm text-yellow-400 hover:underline">Upgrade</Link>
+            <Link href="/upgrade" className="text-sm text-yellow-400 hover:underline transition">Upgrade</Link>
           )}
         </div>
 
@@ -80,7 +79,9 @@ export default function Dashboard() {
               Total edits: <span className="font-semibold text-white">{history.length}</span>
             </p>
           </div>
-          <Link href="/" className="text-sm text-blue-400 hover:underline mt-4 sm:mt-0 transition">← Back to Home</Link>
+          <Link href="/" className="text-sm text-blue-400 hover:underline mt-4 sm:mt-0 transition">
+            ← Back to Home
+          </Link>
         </div>
 
         {/* PDF Edit History */}
