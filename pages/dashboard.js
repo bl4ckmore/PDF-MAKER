@@ -11,16 +11,14 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
     if (!token) {
       router.push("/login");
       return;
     }
-
-    if (storedUser) setUser(JSON.parse(storedUser));
 
     axios
       .get(`${API_BASE_URL}/api/user/dashboard`, {
@@ -38,35 +36,47 @@ export default function Dashboard() {
       });
   }, [router]);
 
-  if (loading)
-    return <p className="text-white p-6">Loading dashboard...</p>;
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    router.push("/");
+  };
+
+  if (loading) return <p className="text-white p-6">Loading...</p>;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white px-4 py-6">
-      <nav className="w-full flex items-center justify-between p-4 bg-gray-800 rounded mb-6">
-        <button
-          onClick={() => router.push("/")}
-          className="text-lg font-bold text-white"
-        >
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* 🔹 Header */}
+      <nav className="w-full flex items-center justify-between p-4 bg-gray-800 shadow-md">
+        <Link href="/" className="text-xl font-bold">
           PDF Editor
+        </Link>
+
+        {/* Always visible burger menu */}
+        <button
+          onClick={() => setShowMobileMenu(!showMobileMenu)}
+          className="text-white text-2xl"
+        >
+          ☰
         </button>
-        <div className="md:flex gap-4 hidden">
-          <Link href="/" className="text-sm text-blue-400 hover:underline">
-            Home
-          </Link>
-          <Link href="/dashboard" className="text-sm text-blue-400 hover:underline">
-            Dashboard
-          </Link>
-          <Link href="/upgrade" className="text-sm text-yellow-400 hover:underline">
-            Upgrade
-          </Link>
-        </div>
-        <div className="md:hidden text-white text-2xl">☰</div>
       </nav>
 
-      <div className="max-w-4xl mx-auto">
+      {/* 🔹 Burger Menu Dropdown */}
+      {showMobileMenu && (
+        <div className="bg-gray-800 w-full text-center p-4 space-y-2 border-b border-gray-700">
+          <Link href="/" className="block hover:underline">🏠 Home</Link>
+          <Link href="/dashboard" className="block hover:underline">📊 Dashboard</Link>
+          <Link href="/upgrade" className="block hover:underline">⚡ Upgrade</Link>
+          <button onClick={handleLogout} className="block text-red-400 hover:underline">
+            🚪 Logout
+          </button>
+        </div>
+      )}
+
+      {/* 🔹 Main Content */}
+      <main className="max-w-4xl mx-auto px-6 py-10">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">👋 Welcome, {user?.name}</h1>
+          <h1 className="text-3xl font-bold">👋 Welcome, {user.name}</h1>
           <Link
             href="/"
             className="text-sm text-blue-400 hover:underline"
@@ -88,11 +98,11 @@ export default function Dashboard() {
                   className="bg-gray-700 p-4 rounded-lg border border-gray-600"
                 >
                   <p className="mb-1">
-                    🔍 <span className="font-semibold">{log.search}</span> → ✍️ {" "}
+                    🔍 <span className="font-semibold">{log.search}</span> → ✍️{" "}
                     <span className="font-semibold">{log.replace}</span>
                   </p>
                   <p>
-                    📁 {" "}
+                    📁{" "}
                     <a
                       href={`${API_BASE_URL}/pdf/${log.filename}`}
                       target="_blank"
@@ -107,7 +117,7 @@ export default function Dashboard() {
             </ul>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
