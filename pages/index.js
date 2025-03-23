@@ -147,15 +147,16 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col justify-between">
-      {/* Nav */}
+      {/* Navbar */}
       <nav className="w-full flex items-center justify-between p-4 bg-gray-800 shadow-md">
         <Link href="/" className="text-lg font-bold">PDF Editor</Link>
 
-        {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-x-4">
           <Link href="/" className="text-sm text-blue-400 hover:underline">Home</Link>
           <Link href="/dashboard" className="text-sm text-blue-400 hover:underline">Dashboard</Link>
-          <Link href="/upgrade" className="text-sm text-yellow-400 hover:underline">Upgrade</Link>
+          {!user?.role || user?.role !== "premium" ? (
+            <Link href="/upgrade" className="text-sm text-yellow-400 hover:underline">Upgrade</Link>
+          ) : null}
           {!user ? (
             <>
               <Link href="/login" className="text-sm text-gray-300 hover:underline">Log In</Link>
@@ -168,8 +169,8 @@ export default function Home() {
           )}
         </div>
 
-        {/* Mobile burger (can enhance later to toggle menu) */}
-        <div className="md:hidden text-white text-2xl gap-4">☰</div>
+        {/* Mobile */}
+        <div className="md:hidden text-white text-2xl">☰</div>
       </nav>
 
       {/* Main Content */}
