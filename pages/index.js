@@ -18,6 +18,7 @@ export default function Home() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [user, setUser] = useState(null);
   const [editCount, setEditCount] = useState(0);
+  const [notFound, setNotFound] = useState(false);
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -69,6 +70,7 @@ export default function Home() {
     setReplaceText("");
     setUpdatedFile(null);
     setFile(null);
+    setNotFound(false);
   };
 
   const handleFileChange = async (e) => {
@@ -77,6 +79,7 @@ export default function Home() {
 
     setFile(selectedFile);
     setOriginalText("");
+    setNotFound(false);
 
     const formData = new FormData();
     formData.append("pdf", selectedFile);
@@ -86,7 +89,6 @@ export default function Home() {
       setOriginalText(res.data.text);
       renderPDFPreview(selectedFile);
     } catch (err) {
-      console.error("Error extracting text:", err);
       alert("❌ Failed to preview PDF content");
     }
   };
@@ -120,10 +122,11 @@ export default function Home() {
       return;
     }
 
-    // Check if searchText exists in the original PDF text
-    if (!originalText.toLowerCase().includes(searchText.toLowerCase())) {
-      alert(`❌ The word "${searchText}" was not found in the PDF.`);
+    if (!originalText.includes(searchText)) {
+      setNotFound(true);
       return;
+    } else {
+      setNotFound(false);
     }
 
     const formData = new FormData();
@@ -139,7 +142,6 @@ export default function Home() {
       const res = await axios.post(`${API_BASE_URL}/api/pdf/replace-text`, formData, { headers });
       setUpdatedFile(`${API_BASE_URL}/pdf/${res.data.filename}`);
     } catch (err) {
-      console.error("Upload Error:", err);
       alert("❌ Failed to process PDF");
     } finally {
       setLoading(false);
@@ -148,16 +150,19 @@ export default function Home() {
 
   const getModifiedPreview = () => {
     return originalText
-      ? originalText.replace(new RegExp(searchText, "gi"), replaceText)
+      ? originalText.replace(new RegExp(searchText, "g"), replaceText)
       : "";
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col justify-between">
+    <div className="min-h-screen bg-cover bg-center bg-no-repeat text-white flex flex-col justify-between"
+      style={{ backgroundImage: "url('/bg-wallpaper.jpg')" }}
+    >
       {/* Navbar */}
-      <nav className="w-full p-4 bg-gray-800 shadow-md flex items-center justify-between">
+      <nav className="w-full p-4 bg-black bg-opacity-60 shadow-md flex items-center justify-between fixed z-50">
         <Link href="/" className="text-lg font-bold">PDF Editor</Link>
 
+        {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-x-4">
           <Link href="/" className="text-sm text-blue-400 hover:underline">Home</Link>
           {user && (
@@ -174,13 +179,11 @@ export default function Home() {
               <Link href="/register" className="text-sm text-gray-300 hover:underline">Register</Link>
             </>
           ) : (
-            <button onClick={handleLogout} className="text-sm text-red-400 hover:underline">
-              Logout
-            </button>
+            <button onClick={handleLogout} className="text-sm text-red-400 hover:underline">Logout</button>
           )}
         </div>
 
-        {/* Mobile Menu Toggle */}
+        {/* Mobile */}
         <div className="md:hidden">
           <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">☰</button>
         </div>
@@ -188,7 +191,7 @@ export default function Home() {
 
       {/* Mobile Dropdown */}
       {showMobileMenu && (
-        <div className="md:hidden bg-gray-800 text-center py-4 space-y-2">
+        <div className="md:hidden bg-black bg-opacity-80 text-center py-4 space-y-2 mt-16 z-50">
           <Link href="/" className="block text-sm text-blue-400 hover:underline">Home</Link>
           {user && (
             <>
@@ -210,37 +213,30 @@ export default function Home() {
       )}
 
       {/* Main Content */}
-      <main className="pt-24 flex-grow flex justify-center px-4">
+      <main className="pt-32 pb-10 flex-grow flex justify-center px-4 backdrop-blur-md">
         {!showEditor ? (
-          <motion.div
-            className="text-center space-y-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+          <motion.div className="text-center space-y-4 bg-black bg-opacity-30 p-8 rounded-xl shadow-lg"
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl font-bold tracking-tight">Online PDF Editor</h1>
-            <p className="text-gray-400 text-lg">Edit, Replace, Annotate PDFs in seconds</p>
+            <h1 className="text-4xl font-bold tracking-tight">Edit Your PDF in Seconds</h1>
+            <p className="text-gray-300 text-lg">No downloads. No hassle. Just upload and go!</p>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
               onClick={handleShowEditor}
               className="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded text-white font-semibold shadow-md transition-all"
             >
-              Edit Now!
+              Start Editing
             </motion.button>
             {user && user.role !== "premium" && (
-              <p className="mt-2 text-yellow-400 text-sm">
+              <p className="mt-2 text-yellow-300 text-sm">
                 You are on a free plan. {editCount}/2 edits used.{" "}
-                <Link href="/upgrade" className="underline">Upgrade</Link> to unlock full access.
+                <Link href="/upgrade" className="underline">Upgrade</Link>
               </p>
             )}
           </motion.div>
         ) : (
-          <motion.div
-            className="w-full max-w-xl space-y-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
+          <motion.div className="w-full max-w-xl space-y-4 bg-black bg-opacity-30 p-6 rounded-lg shadow-lg"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
           >
             <h2 className="text-xl font-bold">📄 PDF Text Editor</h2>
 
@@ -252,6 +248,10 @@ export default function Home() {
 
             <input type="text" placeholder="Text to find" value={searchText} onChange={(e) => setSearchText(e.target.value)} className="w-full p-2 bg-gray-800 rounded" />
             <input type="text" placeholder="Replace with" value={replaceText} onChange={(e) => setReplaceText(e.target.value)} className="w-full p-2 bg-gray-800 rounded" />
+
+            {notFound && (
+              <p className="text-red-400 text-sm">❌ The word "{searchText}" was not found in the document.</p>
+            )}
 
             {originalText && (
               <div className="mt-4 bg-gray-800 p-4 rounded text-sm max-h-64 overflow-auto">
@@ -291,10 +291,8 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center text-sm text-gray-500 py-4">
-        <Link href="/terms" className="text-gray-400 hover:underline">
-          Terms & Privacy
-        </Link>
+      <footer className="text-center text-sm text-gray-300 py-6 bg-black bg-opacity-50">
+        <Link href="/terms" className="hover:underline text-gray-400">Terms & Privacy</Link>
       </footer>
     </div>
   );
