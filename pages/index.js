@@ -3,7 +3,6 @@ import axios from "axios";
 import * as pdfjsLib from "pdfjs-dist";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 
 const API_BASE_URL = "https://pdfapi-si07.onrender.com";
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
@@ -20,8 +19,6 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [editCount, setEditCount] = useState(0);
   const [notFound, setNotFound] = useState(false);
-  const [theme, setTheme] = useState("dark");
-
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -43,16 +40,7 @@ export default function Home() {
           setUser(null);
         });
     }
-
-    const storedTheme = localStorage.getItem("theme");
-    if (storedTheme) setTheme(storedTheme);
   }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-  };
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -100,7 +88,7 @@ export default function Home() {
       const res = await axios.post(`${API_BASE_URL}/api/pdf/extract-text`, formData);
       setOriginalText(res.data.text);
       renderPDFPreview(selectedFile);
-    } catch {
+    } catch (err) {
       alert("❌ Failed to preview PDF content");
     }
   };
@@ -153,7 +141,7 @@ export default function Home() {
 
       const res = await axios.post(`${API_BASE_URL}/api/pdf/replace-text`, formData, { headers });
       setUpdatedFile(`${API_BASE_URL}/pdf/${res.data.filename}`);
-    } catch {
+    } catch (err) {
       alert("❌ Failed to process PDF");
     } finally {
       setLoading(false);
@@ -167,26 +155,19 @@ export default function Home() {
   };
 
   return (
-    <div className={`${theme === "dark" ? "bg-black text-white" : "bg-white text-gray-900"} min-h-screen transition-colors duration-300`}>
+    <div className="min-h-screen bg-cover bg-center bg-no-repeat text-white flex flex-col justify-between"
+      style={{ backgroundImage: "url('/bg-wallpaper.jpg')" }}
+    >
       {/* Navbar */}
-      <nav className="w-full p-4 bg-opacity-80 backdrop-blur-md flex justify-between items-center fixed top-0 z-50 shadow-md bg-black dark:bg-black bg-white">
+      <nav className="w-full p-4 bg-black bg-opacity-60 shadow-md flex items-center justify-between fixed z-50">
         <Link href="/" className="text-lg font-bold">PDF Editor</Link>
-
-        {/* Theme Toggle */}
-        <button
-          onClick={toggleTheme}
-          className="text-white dark:text-yellow-400 hover:scale-105 transition-transform"
-          title="Toggle Theme"
-        >
-          {theme === "dark" ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
-        </button>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-x-4">
-          <Link href="/" className="text-sm text-blue-500 hover:underline">Home</Link>
+          <Link href="/" className="text-sm text-blue-400 hover:underline">Home</Link>
           {user && (
             <>
-              <Link href="/dashboard" className="text-sm text-blue-500 hover:underline">Dashboard</Link>
+              <Link href="/dashboard" className="text-sm text-blue-400 hover:underline">Dashboard</Link>
               {user?.role !== "premium" && (
                 <Link href="/upgrade" className="text-sm text-yellow-400 hover:underline">Upgrade</Link>
               )}
@@ -194,40 +175,67 @@ export default function Home() {
           )}
           {!user ? (
             <>
-              <Link href="/login" className="text-sm text-gray-500 hover:underline">Log In</Link>
-              <Link href="/register" className="text-sm text-gray-500 hover:underline">Register</Link>
+              <Link href="/login" className="text-sm text-gray-300 hover:underline">Log In</Link>
+              <Link href="/register" className="text-sm text-gray-300 hover:underline">Register</Link>
             </>
           ) : (
             <button onClick={handleLogout} className="text-sm text-red-400 hover:underline">Logout</button>
           )}
         </div>
+
+        {/* Mobile */}
+        <div className="md:hidden">
+          <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">☰</button>
+        </div>
       </nav>
 
-      {/* Main */}
-      <main className="pt-32 pb-10 flex-grow flex justify-center px-4">
+      {/* Mobile Dropdown */}
+      {showMobileMenu && (
+        <div className="md:hidden bg-black bg-opacity-80 text-center py-4 space-y-2 mt-16 z-50">
+          <Link href="/" className="block text-sm text-blue-400 hover:underline">Home</Link>
+          {user && (
+            <>
+              <Link href="/dashboard" className="block text-sm text-blue-400 hover:underline">Dashboard</Link>
+              {user?.role !== "premium" && (
+                <Link href="/upgrade" className="block text-sm text-yellow-400 hover:underline">Upgrade</Link>
+              )}
+            </>
+          )}
+          {!user ? (
+            <>
+              <Link href="/login" className="block text-sm text-gray-300 hover:underline">Log In</Link>
+              <Link href="/register" className="block text-sm text-gray-300 hover:underline">Register</Link>
+            </>
+          ) : (
+            <button onClick={handleLogout} className="block text-sm text-red-400 hover:underline">Logout</button>
+          )}
+        </div>
+      )}
+
+      {/* Main Content */}
+      <main className="pt-32 pb-10 flex-grow flex justify-center px-4 backdrop-blur-md">
         {!showEditor ? (
-          <motion.div
-            className={`text-center space-y-4 p-8 rounded-xl shadow-xl ${theme === "dark" ? "bg-black bg-opacity-30" : "bg-gray-100"}`}
+          <motion.div className="text-center space-y-4 bg-black bg-opacity-30 p-8 rounded-xl shadow-lg"
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl font-bold">Edit Your PDF in Seconds</h1>
-            <p className="text-lg text-gray-400">No downloads. Just upload and go!</p>
+            <h1 className="text-4xl font-bold tracking-tight">Edit Your PDF in Seconds</h1>
+            <p className="text-gray-300 text-lg">No downloads. No hassle. Just upload and go!</p>
             <motion.button
               whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
               onClick={handleShowEditor}
-              className="mt-4 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded text-white font-semibold"
+              className="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded text-white font-semibold shadow-md transition-all"
             >
               Start Editing
             </motion.button>
             {user && user.role !== "premium" && (
               <p className="mt-2 text-yellow-300 text-sm">
-                You are on a free plan. {editCount}/2 edits used. <Link href="/upgrade" className="underline">Upgrade</Link>
+                You are on a free plan. {editCount}/2 edits used.{" "}
+                <Link href="/upgrade" className="underline">Upgrade</Link>
               </p>
             )}
           </motion.div>
         ) : (
-          <motion.div
-            className={`w-full max-w-xl space-y-4 p-6 rounded-lg shadow-xl ${theme === "dark" ? "bg-black bg-opacity-30" : "bg-gray-100"}`}
+          <motion.div className="w-full max-w-xl space-y-4 bg-black bg-opacity-30 p-6 rounded-lg shadow-lg"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
           >
             <h2 className="text-xl font-bold">📄 PDF Text Editor</h2>
@@ -255,7 +263,8 @@ export default function Home() {
             )}
 
             <motion.button
-              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.96 }}
               onClick={handleUpload}
               disabled={loading}
               className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded text-white w-full transition-all"
@@ -282,8 +291,8 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center text-sm py-6 bg-black bg-opacity-60 text-gray-300">
-        <Link href="/terms" className="hover:underline">Terms & Privacy</Link>
+      <footer className="text-center text-sm text-gray-300 py-6 bg-black bg-opacity-50">
+        <Link href="/terms" className="hover:underline text-gray-400">Terms & Privacy</Link>
       </footer>
     </div>
   );
