@@ -31,74 +31,103 @@ export default function Home() {
         .get(`${API_BASE_URL}/api/user/dashboard`, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        .then((res) => setEditCount(res.data.history.length))
+        .then((res) => {
+          setEditCount(res.data.history.length);
+        })
         .catch(() => {
-          localStorage.clear();
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
           setUser(null);
         });
     }
   }, []);
 
   const handleLogout = () => {
-    localStorage.clear();
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
     setUser(null);
     window.location.reload();
   };
 
   const handleShowEditor = () => {
-    if (!user) return alert("🔐 Please log in to use the PDF Editor.");
-    if (user.role !== "premium" && editCount >= 2) {
-      return alert("🚫 Free edit limit reached. Please upgrade.");
+    if (!user) {
+      alert("🔐 Please log in to use the PDF Editor.");
+      return;
     }
+
+    if (user.role !== "premium" && editCount >= 2) {
+      alert("🚫 You reached daily free limit. Please upgrade to Premium to update unlimited PDF-s.");
+      return;
+    }
+
     setShowEditor(true);
   };
 
   const handleBack = () => {
     setShowEditor(false);
-    setFile(null);
+    setOriginalText("");
     setSearchText("");
     setReplaceText("");
-    setOriginalText("");
     setUpdatedFile(null);
+    setFile(null);
     setNotFound(false);
   };
 
   const handleFileChange = async (e) => {
-    const selected = e.target.files[0];
-    if (!selected) return;
-    setFile(selected);
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    setFile(selectedFile);
+    setOriginalText("");
     setNotFound(false);
+
     const formData = new FormData();
-    formData.append("pdf", selected);
+    formData.append("pdf", selectedFile);
+
     try {
       const res = await axios.post(`${API_BASE_URL}/api/pdf/extract-text`, formData);
       setOriginalText(res.data.text);
-      renderPDFPreview(selected);
-    } catch {
-      alert("❌ Failed to preview PDF.");
+      renderPDFPreview(selectedFile);
+    } catch (err) {
+      alert("❌ Failed to preview PDF content");
     }
   };
 
   const renderPDFPreview = async (pdfFile) => {
-    const reader = new FileReader();
-    reader.onload = async function () {
-      const typedArray = new Uint8Array(this.result);
-      const pdf = await pdfjsLib.getDocument(typedArray).promise;
-      const page = await pdf.getPage(1);
-      const canvas = canvasRef.current;
-      const context = canvas.getContext("2d");
-      const viewport = page.getViewport({ scale: 0.6 });
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
-      await page.render({ canvasContext: context, viewport }).promise;
-    };
-    reader.readAsArrayBuffer(pdfFile);
+    try {
+      const fileReader = new FileReader();
+      fileReader.onload = async function () {
+        const typedArray = new Uint8Array(this.result);
+        const pdf = await pdfjsLib.getDocument(typedArray).promise;
+        const page = await pdf.getPage(1);
+
+        const canvas = canvasRef.current;
+        const context = canvas.getContext("2d");
+        const viewport = page.getViewport({ scale: 0.6 });
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        await page.render({ canvasContext: context, viewport }).promise;
+      };
+
+      fileReader.readAsArrayBuffer(pdfFile);
+    } catch (error) {
+      console.error("PDF Preview Error:", error);
+    }
   };
 
   const handleUpload = async () => {
-    if (!file || !searchText.trim() || !replaceText.trim()) return alert("Fill all fields");
-    if (!originalText.includes(searchText)) return setNotFound(true);
-    setNotFound(false);
+    if (!file || !searchText.trim() || !replaceText.trim()) {
+      alert("Please complete all fields");
+      return;
+    }
+
+    if (!originalText.includes(searchText)) {
+      setNotFound(true);
+      return;
+    } else {
+      setNotFound(false);
+    }
 
     const formData = new FormData();
     formData.append("pdf", file);
@@ -109,23 +138,31 @@ export default function Home() {
     try {
       const token = localStorage.getItem("token");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
       const res = await axios.post(`${API_BASE_URL}/api/pdf/replace-text`, formData, { headers });
       setUpdatedFile(`${API_BASE_URL}/pdf/${res.data.filename}`);
-    } catch {
-      alert("❌ Failed to process PDF.");
+    } catch (err) {
+      alert("❌ Failed to process PDF");
     } finally {
       setLoading(false);
     }
   };
 
-  const getModifiedPreview = () =>
-    originalText ? originalText.replace(new RegExp(searchText, "g"), replaceText) : "";
+  const getModifiedPreview = () => {
+    return originalText
+      ? originalText.replace(new RegExp(searchText, "g"), replaceText)
+      : "";
+  };
 
   return (
-    <div className="min-h-screen text-white flex flex-col justify-between bg-gradient-to-br from-pink-600 via-indigo-800 to-emerald-500 animate-gradient">
+    <div className="min-h-screen bg-cover bg-center bg-no-repeat text-white flex flex-col justify-between"
+      style={{ backgroundImage: "url('/bg-wallpaper.jpg')" }}
+    >
       {/* Navbar */}
       <nav className="w-full p-4 bg-black bg-opacity-60 shadow-md flex items-center justify-between fixed z-50">
         <Link href="/" className="text-lg font-bold">PDF Editor</Link>
+
+        {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-x-4">
           <Link href="/" className="text-sm text-blue-400 hover:underline">Home</Link>
           {user && (
@@ -145,11 +182,14 @@ export default function Home() {
             <button onClick={handleLogout} className="text-sm text-red-400 hover:underline">Logout</button>
           )}
         </div>
+
+        {/* Mobile */}
         <div className="md:hidden">
           <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-white text-2xl">☰</button>
         </div>
       </nav>
 
+      {/* Mobile Dropdown */}
       {showMobileMenu && (
         <div className="md:hidden bg-black bg-opacity-80 text-center py-4 space-y-2 mt-16 z-50">
           <Link href="/" className="block text-sm text-blue-400 hover:underline">Home</Link>
@@ -172,14 +212,14 @@ export default function Home() {
         </div>
       )}
 
-      {/* Main Section */}
-      <main className="pt-32 pb-10 flex-grow flex justify-center px-4">
+      {/* Main Content */}
+      <main className="pt-32 pb-10 flex-grow flex justify-center px-4 backdrop-blur-md">
         {!showEditor ? (
           <motion.div className="text-center space-y-4 bg-black bg-opacity-30 p-8 rounded-xl shadow-lg"
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
           >
             <h1 className="text-4xl font-bold tracking-tight">Edit Your PDF in Seconds</h1>
-            <p className="text-gray-300 text-lg">No downloads. Just upload & go!</p>
+            <p className="text-gray-300 text-lg">No downloads. No hassle. Just upload and go!</p>
             <motion.button
               whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
               onClick={handleShowEditor}
@@ -189,7 +229,8 @@ export default function Home() {
             </motion.button>
             {user && user.role !== "premium" && (
               <p className="mt-2 text-yellow-300 text-sm">
-                Free plan: {editCount}/2 edits used. <Link href="/upgrade" className="underline">Upgrade</Link>
+                You are on a free plan. {editCount}/2 edits used.{" "}
+                <Link href="/upgrade" className="underline">Upgrade</Link>
               </p>
             )}
           </motion.div>
@@ -198,13 +239,20 @@ export default function Home() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
           >
             <h2 className="text-xl font-bold">📄 PDF Text Editor</h2>
+
             <input type="file" accept="application/pdf" onChange={handleFileChange} className="w-full p-2 bg-gray-800 rounded" />
+
             <div className="flex justify-center">
               <canvas ref={canvasRef} className="my-4 rounded shadow-md border border-gray-600" style={{ width: "100%", maxWidth: "280px" }} />
             </div>
+
             <input type="text" placeholder="Text to find" value={searchText} onChange={(e) => setSearchText(e.target.value)} className="w-full p-2 bg-gray-800 rounded" />
             <input type="text" placeholder="Replace with" value={replaceText} onChange={(e) => setReplaceText(e.target.value)} className="w-full p-2 bg-gray-800 rounded" />
-            {notFound && <p className="text-red-400 text-sm">❌ The word "{searchText}" was not found in the document.</p>}
+
+            {notFound && (
+              <p className="text-red-400 text-sm">❌ The word "{searchText}" was not found in the document.</p>
+            )}
+
             {originalText && (
               <div className="mt-4 bg-gray-800 p-4 rounded text-sm max-h-64 overflow-auto">
                 <h3 className="font-semibold text-green-400 mb-1">Original Preview:</h3>
@@ -213,8 +261,10 @@ export default function Home() {
                 <p className="whitespace-pre-wrap text-white">{getModifiedPreview()}</p>
               </div>
             )}
+
             <motion.button
-              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.96 }}
               onClick={handleUpload}
               disabled={loading}
               className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded text-white w-full transition-all"
@@ -228,11 +278,13 @@ export default function Home() {
                 "Replace Text"
               )}
             </motion.button>
+
             {updatedFile && (
               <a href={updatedFile} download className="block mt-4 text-center bg-blue-700 hover:bg-blue-800 px-6 py-2 rounded">
                 Download Updated PDF
               </a>
             )}
+
             <button onClick={handleBack} className="block mt-2 text-sm text-gray-400 hover:underline">← Back to Home</button>
           </motion.div>
         )}
