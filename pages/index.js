@@ -155,9 +155,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-no-repeat text-white flex flex-col justify-between"
-      style={{ backgroundImage: "url('/bg-wallpaper.jpg')" }}
-    >
+    <div className="min-h-screen animate-gradient bg-gradient-to-br from-pink-500 via-purple-600 to-teal-400 text-white flex flex-col justify-between">
       {/* Navbar */}
       <nav className="w-full p-4 bg-black bg-opacity-60 shadow-md flex items-center justify-between fixed z-50">
         <Link href="/" className="text-lg font-bold">PDF Editor</Link>
