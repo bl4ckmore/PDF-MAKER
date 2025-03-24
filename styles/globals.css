@@ -22,24 +22,5 @@
     background-size: 200% 200%;
     animation: gradientShift 15s ease infinite;
   }
-  html.light {
-    --bg: #ffffff;
-    --text: #111111;
-    --card: #f1f1f1;
-    --input: #e5e7eb;
-  }
-  html.dark {
-    --bg: #0f0f0f;
-    --text: #f9f9f9;
-    --card: #1f1f1f;
-    --input: #2d2d2d;
-  }
-  
-  @layer base {
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-    }
-  }
   
 }
